@@ -1,0 +1,268 @@
+<?php
+$con=mysql_connect("10.0.0.10","dit","4dm1n");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+//$con=mysql_connect("localhost","root","");
+//$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+//--
+//$idkk=$_GET['idkk'];
+$now=date("Y-m-d");
+$idkk=$_GET['idkk'];
+$noitem=$_GET['noitem'];
+$nohanger=$_GET['nohanger'];
+$act=$_GET['g'];
+$data=mysql_query("SELECT *,
+	CONCAT_WS(' ',dry_note,wick_note,absor_note) AS note_g FROM tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
+$rcek1=mysql_fetch_array($data);
+$sqlCekR=mysql_query("SELECT *,
+	CONCAT_WS(' ',rdry_note,rwick_note,rabsor_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
+$rcekR=mysql_fetch_array($sqlCekR);
+$sqlCekD=mysql_query("SELECT *,
+	CONCAT_WS(' ',ddry_note,dwick_note,dabsor_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
+$rcekD=mysql_fetch_array($sqlCekD);
+$data1=mysql_query("SELECT nokk FROM tbl_tq_nokk WHERE id='$idkk'");
+$rd=mysql_fetch_array($data1);
+$data2=mysql_query("SELECT * FROM tbl_tq_nokk WHERE id='$idkk'");
+$rd2=mysql_fetch_array($data2);
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">
+<title>Print Report Functional Adidas</title>
+<style>
+.hurufvertical {
+ writing-mode:tb-rl;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+    transform: rotate(180deg);
+    white-space:nowrap;
+    float:left;
+}	
+
+input{
+text-align:center;
+border:hidden;
+}
+@media print {
+  ::-webkit-input-placeholder { /* WebKit browsers */
+      color: transparent;
+  }
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color: transparent;
+  }
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color: transparent;
+  }
+  :-ms-input-placeholder { /* Internet Explorer 10+ */
+      color: transparent;
+  }
+  .pagebreak { page-break-before:always; }
+  .header {display:block}
+  table thead 
+   {
+    display: table-header-group;
+   }
+}	
+</style>
+</head>
+
+<body>
+<table width="100%">
+    <thead>
+            <td><table width="100%" border="0"> 
+                <tr>
+                    <td align="center" colspan="8" valign="middle"><strong><font size="-2" >FABRIC TEST REPORT</font></strong></td>
+                </tr>
+                <tr>
+                    <td align="right" colspan="8"><img src="adidas.jpg" width="130" height="30"/></td>
+                </tr>
+                <tr>
+                    <td align="left">Test Report No. ITC<?php echo $rd2['no_test'];?></td>
+                    <td align="left">Submission No. -</td>
+                    <td align="right">Version : Mar 2020</td>
+                </tr>
+                </table>
+                <table width="100%" border="1" class="table-list1">
+                <tr>
+                    <td align="left" colspan="8"><strong><font size="-2" >MATERIAL SPESIFICATION:</font></strong></td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="left" style="font-size: 8px;">New Development Testing (  )</td>
+                    <td colspan="4" align="left" style="font-size: 8px;">1st Bulk Testing (  )</td>
+                    <td colspan="2" align="left" style="font-size: 8px;">Reorder Testing (&#10003;)</td>
+                </tr>
+                    <td align="left" style="font-size: 8px;">adidas Ref. No.</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['no_item'];?></td>
+                    <td colspan="4" align="left" style="font-size: 8px;">Mandatory Chart_Table No.: 4</td>
+                    <td align="left" style="font-size: 8px;">P.O.No.</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['no_po'];?></td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size: 8px;">Material Supplier</td>
+                    <td align="left" style="font-size: 8px;">PT. Indo Taichen Textile Industry</td>
+                    <td align="left" style="font-size: 8px;">Weight</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['gramasi'];?>g/m<sup>2</sup></td>
+                    <td align="left" style="font-size: 8px;">Width</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['lebar'];?></td>
+                    <td align="left" style="font-size: 8px;">Order</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['no_order'];?></td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size: 8px;">Supplier Ref.</td>
+                    <td align="left" style="font-size: 8px;">134001</td>
+                    <td align="left" style="font-size: 8px;">Garment Maker</td>
+                    <td colspan="3" align="left" style="font-size: 8px;"><?php echo $rd2['pelanggan'];?></td>
+                    <td align="left" style="font-size: 8px;">adidas Color</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['warna'];?></td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size: 8px;">Composition</td>
+                    <td align="left" style="font-size: 8px;">
+                    <?php
+                    $sql = "SELECT * From tbl_tq_nokk WHERE id='$idkk'";
+                    $result=mysql_query($sql);
+                    while($row=mysql_fetch_array($result)){ 
+                    $detail=explode(",",$row['jenis_kain']);?>
+                    <?php 
+                        echo $detail[0];
+                    ?>
+                    </td>
+                    <td align="left" style="font-size: 8px;">Construction</td>
+                    <td align="left" style="font-size: 8px;">
+                    <?php 
+                       if($detail[1]!=""){echo $detail[1];}else{echo "";}
+                    ?>
+                    </td>
+                    <?php }?>
+                    <td align="left" style="font-size: 8px;">Color No.</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['no_warna'];?></td>
+                    <td align="left" style="font-size: 8px;">Lot</td>
+                    <td align="left" style="font-size: 8px;"><?php echo $rd2['lot'];?></td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size: 8px;">Coating</td>
+                    <td align="left" style="font-size: 8px;">-</td>
+                    <td rowspan="2" align="left" valign="top" style="font-size: 8px;"><strong>Remarks:</strong></td>
+                    <td rowspan="2" colspan="5" align="left" style="font-size: 8px;"></td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size: 8px;">Finishing</td>
+                    <td align="left" style="font-size: 8px;">
+                    <?php 
+                        if($detail[2]!=""){echo $detail[2];}else{echo "";}
+                    ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="8" align="center" style="font-size: 8px;"><strong>Fabric Properties Tests</strong></td>
+                </tr>
+            </table></td>
+        
+    </thead>
+    <tr>
+        <td><table width="100%" border="1" class="table-list1">
+    <thead>	  
+        <tr>
+            <td width="4%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>Method ID</strong></div></td>
+            <td width="4%" rowspan="4" scope="col" style="font-size: 8px;"><div align="left"><strong>Fabric<br>Tech.<br>K: Knit<br>W: Woven</strong></div></td>
+            <td width="4%" rowspan="4" scope="col" style="font-size: 8px;"><div align="left"><strong>Composition<br>N: Natural<br>S: Synthetic</strong></div></td>
+            <td width="11%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>Test Standard Name</strong></div></td>
+            <td width="13%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>Minimum Requirements<br>Underlined requirements are mandatory<br>on material level!</strong></div></td>
+            <td width="4%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>Test Result</strong></div></td>
+            <td width="4%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>Test Details</strong></div></td>
+            <td width="2%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>A</strong></div></td>
+            <td width="2%" rowspan="4" scope="col" style="font-size: 8px;"><div align="center"><strong>R</strong></div></td>
+        </tr>
+    </thead>
+        <!--Absorbency-->
+        <tr>
+            <td align="left" rowspan="2" style="font-size: 8px;" valign="top"><strong>PHM-AP0604</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>KW</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>NS</strong></td>
+            <td align="left" rowspan="2" style="font-size: 8px;" valign="top"><strong>Water Absorbency (drop test)</strong><br><br>*PHX-AP0604 is required as well for all<br>fabrics with hydrophilic finish</td>
+            <td align="left" rowspan="2" style="font-size: 8px;" >Depends On RDY Label<br><br>&ge; 3 sec Knits / &le; 5 sec Woven<br>&le; 5 sec Seamless (Knits & Woven)</td>
+            <td align="center" rowspan="2" style="font-size: 8px;" >
+            <?php if($rcek1['stat_abs']=="RANDOM"){echo $rcekR['rabsor_f1'];}else if($rcek1['stat_abs']=="DISPOSISI"){echo $rcekD['dabsor_f1'];}else{echo $rcek1['absor_f1'];}?><br><br>
+            <?php if($rcek1['stat_abs']=="RANDOM"){echo $rcekR['rabsor_b1'];}else if($rcek1['stat_abs']=="DISPOSISI"){echo $rcekD['dabsor_b1'];}else{echo $rcek1['absor_b1'];}?>
+            </td>
+            <td align="left" style="font-size: 8px;" >[sec] Before Wash</td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_abs']=="A" OR $rcek1['stat_abs']=="PASS" OR $rcek1['stat_abs']=="FAIL" OR $rcek1['stat_abs']=="RANDOM" OR $rcek1['stat_abs']=="DISPOSISI"){echo "A";}?></td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_abs']=="R"){echo "R";}?></td>
+        </tr>
+        <tr>
+            <td align="left" style="font-size: 8px;" >[sec] After 5 Wash</td>
+        </tr>
+        <!--Wicking-->
+        <tr>
+            <td align="left" rowspan="4" style="font-size: 8px;" valign="top"><strong>PHM-AP0616</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>KW</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>NS</strong></td>
+            <td align="left" rowspan="2" style="font-size: 8px;" valign="top"><strong>Wicking Height-Vertical</strong></td>
+            <td align="left" rowspan="2" style="font-size: 8px;" >Depends On RDY Label<br><br>&ge; 100 mm Knits (incl. Seamless)<br>&ge; 90 mm Woven_[mm/30min]</td>
+            <td align="center" rowspan="2" style="font-size: 8px;" >
+            <?php if($rcek1['stat_wic']=="RANDOM"){echo $rcekR['rwick_l1'];}else if($rcek1['stat_wic']=="DISPOSISI"){echo $rcekD['dwick_l1'];}else{echo $rcek1['wick_l1'];}?><br><br>
+            <?php if($rcek1['stat_wic']=="RANDOM"){echo $rcekR['rwick_w1'];}else if($rcek1['stat_wic']=="DISPOSISI"){echo $rcekD['dwick_w1'];}else{echo $rcek1['wick_w1'];}?>
+            </td>
+            <td align="left" style="font-size: 8px;" >[sec] Before Wash</td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_wic']=="A" OR $rcek1['stat_wic']=="PASS" OR $rcek1['stat_wic']=="FAIL" OR $rcek1['stat_wic']=="RANDOM" OR $rcek1['stat_wic']=="DISPOSISI"){echo "A";}?></td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_wic']=="R"){echo "R";}?></td>
+        </tr>
+        <tr>
+            <td align="left" style="font-size: 8px;" >[sec] After 5 Wash</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>KW</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>NS</strong></td>
+            <td align="left" rowspan="2" style="font-size: 8px;" valign="top"><strong>Wicking Height-Horizontal</strong></td>
+            <td align="left" rowspan="2" style="font-size: 8px;" >Depends On RDY Label<br><br>&ge; 100 mm Knits (incl. Seamless)<br>&ge; 90 mm Woven_[mm/30min]</td>
+            <td align="center" rowspan="2" style="font-size: 8px;" >
+            <?php if($rcek1['stat_wic']=="RANDOM"){echo $rcekR['rwick_l2'];}else if($rcek1['stat_wic']=="DISPOSISI"){echo $rcekD['dwick_l2'];}else{echo $rcek1['wick_l2'];}?><br><br>
+            <?php if($rcek1['stat_wic']=="RANDOM"){echo $rcekR['rwick_w2'];}else if($rcek1['stat_wic']=="DISPOSISI"){echo $rcekD['dwick_w2'];}else{echo $rcek1['wick_w2'];}?>
+            </td>
+            <td align="left" style="font-size: 8px;" >[sec] Before Wash</td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_wic']=="A" OR $rcek1['stat_wic']=="PASS" OR $rcek1['stat_wic']=="FAIL" OR $rcek1['stat_wic']=="RANDOM" OR $rcek1['stat_wic']=="DISPOSISI"){echo "A";}?></td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_wic']=="R"){echo "R";}?></td>
+        </tr>
+        <tr>
+            <td align="left" style="font-size: 8px;" >[sec] After 5 Wash</td>
+        </tr>
+        <!--Evaporation Rate-->
+        <tr>
+            <td align="left" rowspan="2" style="font-size: 8px;" valign="top"><strong>PHM-AP0617</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>KW</strong></td>
+            <td align="center" rowspan="2" style="font-size: 8px;" valign="top"><strong>NS</strong></td>
+            <td align="left" rowspan="2" style="font-size: 8px;" valign="top"><strong>Evaporation Rate</strong><br><br>*PHM-AP0617 is to replace PHX-AP0607</td>
+            <td align="left" rowspan="2" style="font-size: 8px;" >Depends On RDY Label<br><br>&ge; 0.2</td>
+            <td align="center" rowspan="2" style="font-size: 8px;" >
+            <?php if($rcek1['stat_dry']=="RANDOM"){echo $rcekR['rdry1'];}else if($rcek1['stat_dry']=="DISPOSISI"){echo $rcekD['ddry1'];}else{echo $rcek1['dry1'];}?><br><br>
+            <?php if($rcek1['stat_dry']=="RANDOM"){echo $rcekR['rdry2'];}else if($rcek1['stat_dry']=="DISPOSISI"){echo $rcekD['ddry2'];}else{echo $rcek1['dry2'];}?>
+            </td>
+            <td align="left" style="font-size: 8px;" >[sec] Before Wash</td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_dry']=="A" OR $rcek1['stat_dry']=="PASS" OR $rcek1['stat_dry']=="FAIL" OR $rcek1['stat_dry']=="RANDOM" OR $rcek1['stat_dry']=="DISPOSISI"){echo "A";}?></td>
+            <td align="center" rowspan="2" style="font-size: 8px;"><?php if($rcek1['stat_dry']=="R"){echo "R";}?></td>
+        </tr>
+        <tr>
+            <td align="left" style="font-size: 8px;" >[sec] After 5 Wash</td>
+        </tr>
+        <tr>
+            <td align="left" style="font-size: 8px;" valign="top">Comments:</td>
+            <td align="left" colspan="8" style="font-size: 8px;"></td>
+        </tr>
+        <table width="100%" border="0">
+        <tr>
+            <td align="left" style="font-size: 8px;" colspan="9">* All tests need to follow the adidas "Quality Assurance Test Matrix" according to lab test and most updated version</td>
+        </tr>
+        <tr>
+            <td align="right" style="font-size: 8px;" colspan="9"><strong>Prepared and checked by: <?php echo $rcek1['approve'];?></strong></td>
+        </tr>
+        <tr>
+            <td align="right" style="font-size: 8px;" colspan="9"><strong>Report issued date: <?php echo $now;?></strong></td>
+        </tr>
+        </table>
+</table></td>
+</table>
+</body>
+</html>

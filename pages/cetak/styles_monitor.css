@@ -1,0 +1,69 @@
+body,td,th {
+  /*font-family: Courier New, Courier, monospace; */
+	font-family:sans-serif, Roman, serif;
+}
+body{
+	margin: 0px auto 0px;
+	padding: 0.5px;
+	font-size: 8px;
+	color: #000;
+	width: 98%;
+	background-position: top;
+	background-color: #fff;
+}
+.table-list {
+	clear: both;
+	text-align: left;
+	border-collapse: collapse;
+	margin: 0px 0px 5px 0px;
+	background:#fff;	
+}
+.table-list td {
+	color: #333;
+	font-size:12px;
+	border-color: #fff;
+	border-collapse: collapse;
+	vertical-align: center;
+	padding: 0px 1px;
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid;
+	border-right:1px #000000 solid;
+
+	
+}
+pre {
+	font-family:sans-serif, Roman, serif;
+	clear:both;
+	margin: 0px auto 0px;
+	padding: 0px;
+	white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word; 
+}
+.table-list1 {
+	clear: both;
+	text-align: left;
+	border-collapse: collapse;
+	margin: 0px 0px 3px 0px;
+	background:#fff;	
+}
+.table-list1 td {
+	color: #333;
+	font-size:11px;
+	border-color: #fff;
+	border-collapse: collapse;
+	vertical-align: center;
+	padding: 0px 1px;
+	border-bottom:1px #000000 solid;
+	border-top:1px #000000 solid;
+	border-left:1px #000000 solid;
+	border-right:1px #000000 solid;
+	
+	
+}
+#nocetak {
+	display:none;
+	}
+-->

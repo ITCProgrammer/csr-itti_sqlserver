@@ -1,0 +1,221 @@
+<?php
+$con=mysql_connect("10.0.0.10","dit","4dm1n");
+//$con=mysql_connect("localhost","root","");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+include "../../tgl_indo.php";
+//--
+$idkk=$_REQUEST['idkk'];
+$act=$_GET['g'];
+//-
+$Awal=$_GET['awal'];
+$Akhir=$_GET['akhir'];
+//$Dept=$_GET['dept'];
+//$Cancel=$_GET['cancel'];
+$qTgl=mysql_query("SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
+$rTgl=mysql_fetch_array($qTgl);
+if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl[tgl_skrg]; $jam=$rTgl[jam_skrg];}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">
+<title>Cetak Returan</title>
+<script>
+
+// set portrait orientation
+
+jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
+
+// set top margins in millimeters
+jsPrintSetup.setOption('marginTop', 0);
+jsPrintSetup.setOption('marginBottom', 0);
+jsPrintSetup.setOption('marginLeft', 0);
+jsPrintSetup.setOption('marginRight', 0);
+
+// set page header
+jsPrintSetup.setOption('headerStrLeft', '');
+jsPrintSetup.setOption('headerStrCenter', '');
+jsPrintSetup.setOption('headerStrRight', '');
+
+// set empty page footer
+jsPrintSetup.setOption('footerStrLeft', '');
+jsPrintSetup.setOption('footerStrCenter', '');
+jsPrintSetup.setOption('footerStrRight', '');
+
+// clears user preferences always silent print value
+// to enable using 'printSilent' option
+jsPrintSetup.clearSilentPrint();
+
+// Suppress print dialog (for this context only)
+jsPrintSetup.setOption('printSilent', 1);
+
+// Do Print 
+// When print is submitted it is executed asynchronous and
+// script flow continues after print independently of completetion of print process! 
+jsPrintSetup.print();
+
+window.addEventListener('load', function () {
+    var rotates = document.getElementsByClassName('rotate');
+    for (var i = 0; i < rotates.length; i++) {
+        rotates[i].style.height = rotates[i].offsetWidth + 'px';
+    }
+});
+// next commands
+
+</script>
+<style>
+.hurufvertical {
+ writing-mode:tb-rl;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+    transform: rotate(180deg);
+    white-space:nowrap;
+    float:left;
+}	
+
+input{
+text-align:center;
+border:hidden;
+}
+@media print {
+  ::-webkit-input-placeholder { /* WebKit browsers */
+      color: transparent;
+  }
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color: transparent;
+  }
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color: transparent;
+  }
+  :-ms-input-placeholder { /* Internet Explorer 10+ */
+      color: transparent;
+  }
+  .pagebreak { page-break-before:always; }
+  .header {display:block}
+  table thead 
+   {
+    display: table-header-group;
+   }
+}	
+</style>	
+</head>
+<?php 
+//$nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER");	
+?>
+<body>
+<table width="100%">
+  <thead>
+    <tr>
+      <td><table width="100%" border="1" class="table-list1"> 
+  <tr>
+        <td align="center"><strong><font size="+1">LAPORAN RETURN</font><br />
+		<font size="-1">Periode: <?php echo date("d/m/Y", strtotime($Awal));?> s/d <?php echo date("d/m/Y", strtotime($Akhir));?></font>
+          <br />
+		<font size="-1">FW-06-QCF-02/02</font></strong></td>
+    </tr>
+  </table>
+
+		</td>
+    </tr>
+	</thead>
+    <tr>
+      <td><table width="100%" border="1" class="table-list1">
+        <thead>
+          <tr align="center">
+			<td><font size="-2"><strong>NO</strong></font></td>
+            <td><font size="-2"><strong>TANGGAL DARI GKJ</strong></font></td>
+            <td><font size="-2"><strong>TGL SURAT JALAN</strong></font></td>
+            <td><font size="-2"><strong>NO SURAT JALAN LANGGANAN</strong></font></td>
+            <td><font size="-2"><strong>LANGGANAN</strong></font></td>
+            <td><font size="-2"><strong>PO</strong></font></td>
+            <td><font size="-2"><strong>ORDER</strong></font></td>
+            <td><font size="-2"><strong>JENIS KAIN</strong></font></td>
+            <td><font size="-2"><strong>WARNA</strong></font></td>
+            <td><font size="-2"><strong>LOT</strong></font></td>
+            <td><font size="-2"><strong>ROLL</strong></font></td>
+            <td><font size="-2"><strong>QTY SURAT JALAN</strong></font></td>
+            <td><font size="-2"><strong>QTY TIMBANG ULANG</strong></font></td>
+            <td><font size="-2"><strong>MASALAH</strong></font></td>
+            <td><font size="-2"><strong>TANGGUNG JAWAB</strong></font></td>
+            <td><font size="-2"><strong>KETERANGAN</strong></font></td>
+          </tr>
+		</thead>
+		<tbody>  
+		<?php
+	$no=1;
+	$Awal=$_GET['awal'];
+	$Akhir=$_GET['akhir'];		
+  $qry1=mysql_query("SELECT a.*, b.langganan, SUM(a.kg) as kgrt, SUM(a.roll) as rollrt
+  FROM tbl_detail_retur a LEFT JOIN tbl_aftersales b ON a.nokk=b.nokk
+  WHERE DATE_FORMAT( b.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' GROUP BY b.langganan, b.id");
+  //$qrygk=mysql_query("");
+  $troll="";
+  $tqty=0;
+  $tqty_tu=0;
+            while($row1=mysql_fetch_array($qry1)){
+        $qry2=mysql_query("SELECT t_jawab, t_jawab1, t_jawab2 FROM tbl_aftersales WHERE nokk='$row1[nokk]'");
+        $r2=mysql_fetch_array($qry2);
+		 ?>
+          <tr valign="top">
+            <td align="center" valign="middle"><font size="-2"><?php echo $no; ?></font></td>
+            <td align="left" valign="middle"><font size="-2"><?php echo date("d/m/y", strtotime($row1['tgltrm_sjretur']));?></font></td>
+            <td align="left" valign="middle"><font size="-2"><?php echo date("d/m/y", strtotime($row1['tgl_sjretur']));?></font></td>
+            <td align="center" valign="middle"><font size="-2"><?php echo $row1['sjreturplg'];?></font></td>
+            <td align="center" valign="middle"><font size="-2"><?php echo strtoupper($row1['langganan']);?></font></td>
+            <td align="center" valign="middle"><font size="-2"><?php echo strtoupper($row1['po']);?></font></td>
+            <td align="center" valign="middle"><font size="-2"><?php echo strtoupper($row1['no_order']);?></font></td>
+            <td align="left" valign="middle"><font size="-2"><?php echo strtoupper($row1['jenis_kain']);?></font></td>
+            <td align="left" valign="middle"><font size="-2"><?php echo strtoupper($row1['warna']);?></font></td>
+            <td align="center" valign="middle"><font size="-2"><?php echo $row1['lot'];?></font></td>
+            <td align="right" valign="middle"><font size="-2"><?php echo $row1['roll'];?></font></td>
+            <td align="right" valign="middle"><font size="-2"><?php echo $row1['kg'];?></font></td>
+            <td align="right" valign="middle"><font size="-2"><?php echo $row1['qty_tu'];?></font></td>
+            <td align="left" valign="middle"><font size="-2"><?php echo $row1['masalah'];?></font></td>
+            <td align="center" valign="middle"><font size="-2">
+            <?php if($r2['t_jawab']!="" and $r2['t_jawab1']!="" and $r2['t_jawab2']!=""){echo $r2['t_jawab'].",".$r2['t_jawab1'].",".$r2['t_jawab2'];
+                }else if($r2['t_jawab']!="" and $r2['t_jawab1']!="" and $r2['t_jawab2']==""){
+                echo $r2['t_jawab'].",".$r2['t_jawab1'];	
+				}else if($r2['t_jawab']!="" and $r2['t_jawab1']=="" and $r2['t_jawab2']!=""){
+                echo $r2['t_jawab'].",".$r2['t_jawab2'];	
+				}else if($r2['t_jawab']=="" and $r2['t_jawab1']!="" and $r2['t_jawab2']!=""){
+                echo $r2['t_jawab1'].",".$r2['t_jawab2'];	
+				}else if($r2['t_jawab']!="" and $r2['t_jawab1']=="" and $r2['t_jawab2']==""){
+                echo $r2['t_jawab'];
+				}else if($r2['t_jawab']=="" and $r2['t_jawab1']!="" and $r2['t_jawab2']==""){
+                echo $r2['t_jawab1'];
+				}else if($r2['t_jawab']=="" and $r2['t_jawab1']=="" and $r2['t_jawab2']!=""){
+                echo $r2['t_jawab2'];	
+				}else if($r2['t_jawab']=="" and $r2['t_jawab1']=="" and $r2['t_jawab2']==""){
+                echo "";	
+				}  ?>
+            </font></td>
+            <td align="left" valign="middle"><font size="-2"><?php echo $row1['ket'];?></font></td>
+          </tr>
+        <?php $no++;
+        $troll=$troll+$row1['roll'];
+        $tqty=$tqty+$row1['kg'];
+        $tqty_tu=$tqty_tu+$row1['qty_tu'];
+        } 
+        ?>
+          <tr valign="top">
+            <td colspan="10" align="center"><strong>TOTAL</strong></td>
+            <td align="right"><strong><?php echo $troll;?></strong></td>
+            <td align="right"><strong><?php echo number_format($tqty,2);?></strong></td>
+            <td align="right"><strong><?php echo number_format($tqty_tu,2);?></strong></td>
+            <td colspan="3" align="center">&nbsp;</td>
+          </tr>
+			
+        </tbody>
+      </table></td>
+    </tr>
+  
+</table>
+
+<script>
+//alert('cetak');window.print();
+</script> 
+</body>
+</html>

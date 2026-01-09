@@ -1,0 +1,1005 @@
+<?php
+$con=mysql_connect("svr4","dit","4dm1n");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+include "../../tgl_indo.php";
+$qry=mysql_query("SELECT * FROM tbl_ncp_qcf WHERE id='$_GET[id]'",$con);
+$d=mysql_fetch_array($qry);
+//RMP Benang
+if(strpos($d[rmp_benang],"Horizontal")>-1){
+	$rmpBng1="x";
+}else{
+	$rmpBng1="";
+}
+if(strpos($d[rmp_benang],"Benang Kasar Halus")>-1){
+	$rmpBng2="x";
+}else{
+	$rmpBng2="";
+}
+if(strpos($d[rmp_benang],"Bintik bintik Kapas")>-1){
+	$rmpBng3="x";
+}else{
+	$rmpBng3="";
+}
+if(strpos($d[rmp_benang],"Gumpalan Kapas/Kapas Mati")>-1){
+	$rmpBng4="x";
+}else{
+	$rmpBng4="";
+}
+if(strpos($d[rmp_benang],"Benang Lain Lot")>-1){
+	$rmpBng5="x";
+}else{
+	$rmpBng5="";
+}
+//RMP Rajut Knitting
+if(strpos($d[rmp_rajut],"Horizontal")>-1){
+	$rmpRjt1="x";
+}else{
+	$rmpRjt1="";
+}
+?>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Form NCP</title>
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">	
+</head>
+
+<body>
+<table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td colspan="6" align="center"><font size="+1"><strong>FORMULIR PRODUK TIDAK SESUAI</strong></font></td>
+    </tr>
+    <tr>
+      <td colspan="6" align="center"><font size="-1"><strong>No. NCP: <?php echo $d[no_ncp];?></strong></font></td>
+    </tr>
+    <tr>
+      <td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo ($d[tgl_buat],true);?></td>
+      <td colspan="4" align="right">KODE:  <?php echo $d[dept];?></td>
+    </tr>
+    <tr>
+      <td width="18%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">PELANGGAN</td>
+      <td width="32%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[langganan]."/".$d[buyer];?></td>
+      <td width="9%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">ORDER</td>
+      <td colspan="3" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[no_order];?></td>
+    </tr>
+    <tr>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">PO</td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[po];?></td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">ROLL</td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[rol];?></td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">WEIGHT</td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[berat];?> kg</td>
+    </tr>
+    <tr>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">JENIS KAIN</td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[jenis_kain];?></td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">LOT NO.</td>
+      <td width="16%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[lot];?></td>
+      <td width="8%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">BATCH NO</td>
+      <td width="17%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[nokk];?></td>
+    </tr>
+    <tr>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">NO. WARNA/WARNA</td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[no_warna]."/".$d[warna];?></td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">PO RAJUT</td>
+      <td colspan="3" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[po_rajut]." - ".$d[supp_rajut];?></td>
+    </tr>
+    <tr>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid; height: 0.4in;">ANALISA KERUSAKAN YANG TERJADI</td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[rmp_benang];?></td>
+      <td valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">TTD Peninjau Awal</td>
+      <td colspan="3" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td colspan="12" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">DEPARTEMEN PENYEBAB PRODUK TIDAK SESUAI</td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">RMP (BENANG)</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">RMP (RAJUT/KNITTING)</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">DYEING</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">GARUK</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">FINISHING</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="2%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $rmpBng1; ?></td>
+      <td width="16%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Horizontal</td>
+      <td width="2%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="15%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Benang Putus</td>
+      <td width="2%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="9%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Belang</td>
+      <td width="2%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="16%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Bulu Kain Panjang / Tidak Rata</td>
+      <td width="2%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="16%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Potong Pinggir Jelek</td>
+      <td width="2%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="16%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kaitan Jarum</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $rmpBng2; ?></td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Benang Kasar Halus</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Lebar &amp; Gramasi</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Garis Lipat</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Bintik bintik Kapas</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kena Angin</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Gesekan</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $rmpBng3; ?></td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Bintik bintik Kapas</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Lubang / Bolong</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Luntur</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Garis Vertikal</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Gosong</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Salah Sample Cocok Warna</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $rmpBng4; ?></td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Gumpalan Kapas / Kapas Mati</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Minyak / Jarum Minyak</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp; </td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Bolong bolong</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kotor dibulu / Kotor Tanah</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Serat Bengkok</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Salah Standar Resep</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $rmpBng5; ?></td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Benang Lain Lot</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Vertikal</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kena Warna</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Peach Kurang Bagus</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Bintik bintik Kotoran / Minyak</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Salah Timbang Obat</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Garis Lurus di Tengah tengah</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kena Softer</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Garukan dimuka Kain</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Benang Terkait Jarum</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Horizontal</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Cakar Ayam</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Cakar Ayam / Garis Lipat</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Lem Pinggir Tidak Ada</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Benang Palsu</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Cacat Gesekan</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Garukan Jelek</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kena Warna</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Beda Warna</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Horizontal</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Kejepit Roll</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Bulu Garukan Tipis / Botak</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Lebar &amp; Gramasi Tidak Ok</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td width="12%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;height: 0.2in;">Tempat Kain Diletakan </td>
+      <td width="19%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;"><?php echo $d[tempat];?></td>
+      <td width="32%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Tgl terima form NCP dari :</td>
+      <td width="31%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Tgl Serah terima ke PPC :</td>
+      <td width="6%" valign="top" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Ket.</td>
+    </tr>
+  </tbody>
+</table>
+<table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Tindakan Penyelesaian</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">TTD Dept.<br>
+Penanggung Jawab</td>
+      <td colspan="2" rowspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Non Standar Proses</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Tanggal Penyelesaian</td>
+      <td colspan="2" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Verifikasi Mutu / Quality :</td>
+      <td width="18%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Catatan Verifikator (Jika Ada) </td>
+      <td width="9%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">TTD Peninjau</td>
+    </tr>
+    <tr>
+      <td width="2%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="17%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Celup Ulang</td>
+      <td width="6%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Penyebab</td>
+      <td width="7%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Perbaikan</td>
+      <td width="8%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Rencana</td>
+      <td width="6%" align="center" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Actual</td>
+      <td width="2%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="13%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">President Director</td>
+      <td rowspan="6" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td rowspan="6" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Cutting Loss</td>
+      <td rowspan="5" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td rowspan="5" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td colspan="2" rowspan="4" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td rowspan="5" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td rowspan="5" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Marketing</td>
+    </tr>
+    <tr>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Masuk Gudang BB/BS</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Manufacturing Director</td>
+    </tr>
+    <tr>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Finishing Ulang / Tarik Lebar</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Q.C.</td>
+    </tr>
+    <tr>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Test Laboratorium</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td width="4%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">Dept.</td>
+      <td width="8%" style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">:</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+      <td style="border-top:1px #000000 solid; 
+	border-bottom:1px #000000 solid;
+	border-left:1px #000000 solid; 
+	border-right:1px #000000 solid;">&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<table width="100%" border="0">
+  <tbody>
+    <tr>
+      <td width="8%" rowspan="4" valign="top">Lembar Warna :</td>
+      <td width="7%">1. Putih/ Asli</td>
+      <td width="37%">: Untuk QC</td>
+      <td width="10%" rowspan="3" valign="top">Perhatian:</td>
+      <td width="38%">1. Bon ini hanya berlaku / dipakai dalam pabrik saja.</td>
+    </tr>
+    <tr>
+      <td>2. Merah</td>
+      <td>: Untuk PPC</td>
+      <td>2. Setiap kerusakan kain harus gunting contoh.</td>
+    </tr>
+    <tr>
+      <td>3. Kuning</td>
+      <td>: Untuk Dept. Penyebab NCP</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>4. Hijau </td>
+      <td colspan="2"> : Terlampir Pada Kartu Kerja, Untuk Arsip QC Setelah</td>
+      <td>&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+
+</body>
+</html>

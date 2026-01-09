@@ -1,0 +1,223 @@
+<?php
+//error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+$con=mysql_connect("10.0.0.10","dit","4dm1n");
+//$con=mysql_connect("localhost","root","");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+include "../../tgl_indo.php";
+//--
+$idkk=$_REQUEST['idkk'];
+$act=$_GET['g'];
+//-
+$Awal=$_GET['awal'];
+$Akhir=$_GET['akhir'];
+$GShift=$_GET['shft'];
+$Subdept=$_GET['subdept'];
+$TotalKirim=$_GET['total'];
+$TotalLot=$_GET['total_lot'];
+$qTgl=mysql_query("SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
+$rTgl=mysql_fetch_array($qTgl);
+if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl[tgl_skrg]; $jam=$rTgl[jam_skrg];}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">
+<title>Cetak Summary KPE Berdasarkan Solusi</title>
+<script>
+
+// set portrait orientation
+
+jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
+
+// set top margins in millimeters
+jsPrintSetup.setOption('marginTop', 0);
+jsPrintSetup.setOption('marginBottom', 0);
+jsPrintSetup.setOption('marginLeft', 0);
+jsPrintSetup.setOption('marginRight', 0);
+
+// set page header
+jsPrintSetup.setOption('headerStrLeft', '');
+jsPrintSetup.setOption('headerStrCenter', '');
+jsPrintSetup.setOption('headerStrRight', '');
+
+// set empty page footer
+jsPrintSetup.setOption('footerStrLeft', '');
+jsPrintSetup.setOption('footerStrCenter', '');
+jsPrintSetup.setOption('footerStrRight', '');
+
+// clears user preferences always silent print value
+// to enable using 'printSilent' option
+jsPrintSetup.clearSilentPrint();
+
+// Suppress print dialog (for this context only)
+jsPrintSetup.setOption('printSilent', 1);
+
+// Do Print 
+// When print is submitted it is executed asynchronous and
+// script flow continues after print independently of completetion of print process! 
+jsPrintSetup.print();
+
+window.addEventListener('load', function () {
+    var rotates = document.getElementsByClassName('rotate');
+    for (var i = 0; i < rotates.length; i++) {
+        rotates[i].style.height = rotates[i].offsetWidth + 'px';
+    }
+});
+// next commands
+
+</script>
+<style>
+.hurufvertical {
+ writing-mode:tb-rl;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+    transform: rotate(180deg);
+    white-space:nowrap;
+    float:left;
+}	
+
+input{
+text-align:center;
+border:hidden;
+}
+@media print {
+  ::-webkit-input-placeholder { /* WebKit browsers */
+      color: transparent;
+  }
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color: transparent;
+  }
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color: transparent;
+  }
+  :-ms-input-placeholder { /* Internet Explorer 10+ */
+      color: transparent;
+  }
+  .pagebreak { page-break-before:always; }
+  .header {display:block}
+  table thead 
+   {
+    display: table-header-group;
+   }
+}	
+</style>	
+</head>
+<?php 
+$nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER");	
+?>
+<body>
+<table width="100%">
+  <thead>
+    <tr>
+      <td><table width="100%" border="1" class="table-list1"> 
+  <tr>
+    <td align="center"><strong><font size="+1">SUMMARY KPE BERDASARKAN SOLUSI</font><br />
+		<font size="-1">Periode: <?php echo date("d/m/Y", strtotime($Awal));?> s/d <?php echo date("d/m/Y", strtotime($Akhir));?></font>
+          <br />
+    </strong></td>
+    </tr>
+  </table></td>
+    </tr>
+	</thead>
+    <tr>
+        <td><table width="100%" border="1" class="table-list1">
+            <thead>
+                <tr align="center">
+                    <td rowspan="2"><font size="-2"><strong>SOLUSI</strong></font></td>
+                    <td colspan="4"><font size="-2"><strong>LOLOS QC</strong></font></td>
+                    <td colspan="4"><font size="-2"><strong>DISPOSISI QC</strong></font></td>
+                    <td colspan="4"><font size="-2"><strong>PRODUKSI</strong></font></td>
+                </tr>
+                <tr align="center">
+                    <td><font size="-2"><strong>QTY CLAIM (KG)</strong></font></td>
+                    <td><font size="-2"><strong>% (Qty Claim)</strong></font></td>
+                    <td><font size="-2"><strong>TOTAL KASUS</strong></font></td>
+                    <td><font size="-2"><strong>% (Total Kasus)</strong></font></td>
+                    <td><font size="-2"><strong>QTY CLAIM (KG)</strong></font></td>
+                    <td><font size="-2"><strong>% (Qty Claim)</strong></font></td>
+                    <td><font size="-2"><strong>TOTAL KASUS</strong></font></td>
+                    <td><font size="-2"><strong>% (Total Kasus)</strong></font></td>
+                    <td><font size="-2"><strong>QTY CLAIM (KG)</strong></font></td>
+                    <td><font size="-2"><strong>% (Qty Claim)</strong></font></td>
+                    <td><font size="-2"><strong>TOTAL KASUS</strong></font></td>
+                    <td><font size="-2"><strong>% (Total Kasus)</strong></font></td>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+            $qry=mysql_query("SELECT DISTINCT(solusi) FROM tbl_aftersales WHERE
+            DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
+            AND '$Akhir' AND (solusi!=NULL OR solusi!='') ");
+            $total_dqc=0;
+            $total_lqc=0;
+            $total_pro=0;
+            $tcase_dqc=0;
+            $tcase_lqc=0;
+            $tcase_pro=0;
+            while($r=mysql_fetch_array($qry)){
+                $qryDisQC=mysql_query("SELECT COUNT(*) AS jml_dqc, SUM(qty_claim) as qty_claim_dqc FROM tbl_aftersales WHERE
+                DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
+                AND '$Akhir' AND sts_disposisiqc='1' AND solusi='$r[solusi]'");
+                $rDisQC=mysql_fetch_array($qryDisQC);
+                $qryLolosQC=mysql_query("SELECT COUNT(*) AS jml_lqc, SUM(qty_claim) as qty_claim_lqc FROM tbl_aftersales WHERE
+                DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
+                AND '$Akhir' AND sts='1' AND solusi='$r[solusi]'");
+                $rLolosQC=mysql_fetch_array($qryLolosQC);
+                $qryPro=mysql_query("SELECT COUNT(*) AS jml_pro, SUM(qty_claim) as qty_claim_pro FROM tbl_aftersales WHERE
+                DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
+                AND '$Akhir' AND sts_disposisipro='1' AND solusi='$r[solusi]'");
+                $rPro=mysql_fetch_array($qryPro);
+            ?>
+            <tr>
+                <td align="left"><?php echo $r['solusi'];?></td>
+                <td align="center"><?php echo $rLolosQC['qty_claim_lqc'];?></td>
+                <td align="center"><?php echo number_format(($rLolosQC['qty_claim_lqc']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo $rLolosQC['jml_lqc'];?></td>
+                <td align="center"><?php echo number_format(($rLolosQC['jml_lqc']/$TotalLot)*100,2)." %";?></td>
+                <td align="center"><?php echo $rDisQC['qty_claim_dqc'];?></td>
+                <td align="center"><?php echo number_format(($rDisQC['qty_claim_dqc']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo $rDisQC['jml_dqc'];?></td>
+                <td align="center"><?php echo number_format(($rDisQC['jml_dqc']/$TotalLot)*100,2)." %";?></td>
+                <td align="center"><?php echo $rPro['qty_claim_pro'];?></td>
+                <td align="center"><?php echo number_format(($rPro['qty_claim_pro']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo $rPro['jml_pro'];?></td>
+                <td align="center"><?php echo number_format(($rPro['jml_pro']/$TotalLot)*100,2)." %";?></td>
+            </tr>
+            <?php $total_dqc=$total_dqc+$rDisQC['qty_claim_dqc'];
+            $total_pro=$total_pro+$rPro['qty_claim_pro'];
+            $tcase_dqc=$tcase_dqc+$rDisQC['jml_dqc'];
+            $tcase_pro=$tcase_pro+$rPro['jml_pro'];
+            $total_lqc=$total_lqc+$rLolosQC['qty_claim_lqc'];
+            $tcase_lqc=$tcase_lqc+$rLolosQC['jml_lqc'];} ?>
+             <tr>
+                <td align="left"><strong>TOTAL</strong></td>
+                <td align="center"><strong><?php echo number_format($total_lqc,2); ?></strong></td>
+                <td align="center"><strong><?php echo number_format(($total_lqc/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo $tcase_lqc." Kasus"; ?></strong></td>
+                <td align="center"><strong><?php echo number_format(($tcase_lqc/$TotalLot)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo number_format($total_dqc,2); ?></strong></td>
+                <td align="center"><strong><?php echo number_format(($total_dqc/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo $tcase_dqc." Kasus"; ?></strong></td>
+                <td align="center"><strong><?php echo number_format(($tcase_dqc/$TotalLot)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo number_format($total_pro,2); ?></strong></td>
+                <td align="center"><strong><?php echo number_format(($total_pro/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo $tcase_pro." Kasus"; ?></strong></td>
+                <td align="center"><strong><?php echo number_format(($tcase_pro/$TotalLot)*100,2)." %";?></strong></td>
+            </tr>
+            <tr>
+                <td align="left"><strong>TOTAL KIRIM</strong></td>
+                <td align="left" colspan="12"><strong><?php echo number_format($TotalKirim,2)." Kg"; ?></strong></td>
+            </tr>
+            <tr>
+                <td align="left"><strong>TOTAL LOT KAIN</strong></td>
+                <td align="left" colspan="12"><strong><?php echo $TotalLot; ?></strong></td>
+            </tr>
+            </tbody>
+        </table></td>
+    </tr>
+</table>
+</body>
+</html>

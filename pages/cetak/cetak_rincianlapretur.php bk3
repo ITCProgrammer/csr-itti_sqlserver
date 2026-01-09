@@ -1,0 +1,1277 @@
+<?php
+$con=mysql_connect("10.0.0.10","dit","4dm1n");
+//$con=mysql_connect("localhost","root","");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+include "../../tgl_indo.php";
+//--
+$idkk=$_REQUEST['idkk'];
+$act=$_GET['g'];
+//-
+$Awal=$_GET['awal'];
+$Akhir=$_GET['akhir'];
+$TotalKirim=$_GET['total'];
+//$Dept=$_GET['dept'];
+//$Cancel=$_GET['cancel'];
+$qTgl=mysql_query("SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
+$rTgl=mysql_fetch_array($qTgl);
+if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">
+<title>Cetak Detail Retur</title>
+<script>
+
+</script>
+<style>
+.hurufvertical {
+ writing-mode:tb-rl;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+    transform: rotate(180deg);
+    white-space:nowrap;
+    float:left;
+}	
+
+input{
+text-align:center;
+border:hidden;
+font-size: 9px;	
+font-family:sans-serif, Roman, serif;	
+}
+@media print {
+  ::-webkit-input-placeholder { /* WebKit browsers */
+      color: transparent;
+  }
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color: transparent;
+  }
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color: transparent;
+  }
+  :-ms-input-placeholder { /* Internet Explorer 10+ */
+      color: transparent;
+  }
+  .pagebreak { page-break-before:always; }
+  .header {display:block}
+  table thead 
+   {
+    display: table-header-group;
+   }
+   body {
+        margin-top: 5mm; 
+        margin-bottom: 0mm; 
+        margin-left: 3mm; 
+        margin-right: 0mm
+        }
+}	
+</style>	
+</head>
+<body>
+<table width="100%">
+  <thead>
+    <tr>
+        <td><table border="0" class="table-list1" width="100%"> 
+            <tr>
+                <td align="center" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="+1">LAPORAN RETURN</font><br />
+                <font size="-1">BULAN <input name="nama5" type="text" placeholder="Ketik" size="12" style="font-size: 13px; font-weight:bold;" /></font>
+                <br />
+                <font size="-1">FW-06-QCF-02/02</font></strong></td>
+            </tr>
+         </table></td>
+    </tr>
+	</thead>
+    <tr><td><br><br><br></td></tr>
+    <?php
+        $qryCek=mysql_query("SELECT DISTINCT t_jawab FROM tbl_detail_retur 
+        WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'");
+       $tdye=$tfin=$tknt=$tqcf=$tlab=$trmp=$tprt=$tpro=$tgkj=$tcst=$tgkg=$tknk=$tbrs=0;
+        while($rCek=mysql_fetch_array($qryCek)){
+    ?>
+    <?php if($rCek['t_jawab']=="DYE"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrydye=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='DYE' OR `t_jawab1`='DYE' OR `t_jawab2`='DYE')");
+                $rowdye=mysql_fetch_array($qrydye);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowdye['t_jawab']=="DYE"){echo $rowdye['t_jawab'];}else if($rowdye['t_jawab1']=="DYE"){echo $rowdye['t_jawab1'];}else if($rowdye['t_jawab2']=="DYE"){echo $rowdye['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrydye1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2, masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='DYE' OR `t_jawab1`='DYE' OR `t_jawab2`='DYE')");
+                    $tdye=0;
+                    while($rowdye1=mysql_fetch_array($qrydye1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowdye1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowdye1['t_jawab1']!=""){echo $kgdye=number_format(($rowdye1['kg']/2),2)." Kg";}else if($rowdye1['t_jawab2']!=""){echo $kgdye=number_format(($rowdye1['kg']/3),2)." Kg";}else{echo $kgdye=$rowdye1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tdye=$tdye+$kgdye;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tdye,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="FIN"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryfin=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='FIN' OR `t_jawab1`='FIN' OR `t_jawab2`='FIN')");
+                $rowfin=mysql_fetch_array($qryfin);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowfin['t_jawab']=="FIN"){echo $rowfin['t_jawab'];}else if($rowfin['t_jawab1']=="FIN"){echo $rowfin['t_jawab1'];}else if($rowfin['t_jawab2']=="FIN"){echo $rowfin['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryfin1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='FIN' OR `t_jawab1`='FIN' OR `t_jawab2`='FIN')");
+                    $tfin=0;
+                    while($rowfin1=mysql_fetch_array($qryfin1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowfin1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowfin1['t_jawab1']!=""){echo $kgfin=number_format(($rowfin1['kg']/2),2)." Kg";}else if($rowfin1['t_jawab2']!=""){echo $kgfin=number_format(($rowfin1['kg']/3),2)." Kg";}else{echo $kgfin=$rowfin1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                    </tr>
+                    <?php 
+                    $tfin=$tfin+$kgfin;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tfin,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="KNT"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryknt=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNT' OR `t_jawab1`='KNT' OR `t_jawab2`='KNT')");
+                $rowknt=mysql_fetch_array($qryknt);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowknt['t_jawab']=="KNT"){echo $rowknt['t_jawab'];}else if($rowknt['t_jawab1']=="KNT"){echo $rowknt['t_jawab1'];}else if($rowknt['t_jawab2']=="KNT"){echo $rowknt['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryknt1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNT' OR `t_jawab1`='KNT' OR `t_jawab2`='KNT')");
+                    $tknt=0;
+                    while($rowknt1=mysql_fetch_array($qryknt1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowknt1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowknt1['t_jawab1']!=""){echo $kgknt=number_format(($rowknt1['kg']/2),2)." Kg";}else if($rowknt1['t_jawab2']!=""){echo $kgknt=number_format(($rowknt1['kg']/3),2)." Kg";}else{echo $kgknt=$rowknt1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tknt=$tknt+$kgknt;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tknt,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="QCF"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryqcf=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='QCF' OR `t_jawab1`='QCF' OR `t_jawab2`='QCF')");
+                $rowqcf=mysql_fetch_array($qryqcf);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowqcf['t_jawab']=="QCF"){echo $rowqcf['t_jawab'];}else if($rowqcf['t_jawab1']=="QCF"){echo $rowqcf['t_jawab1'];}else if($rowqcf['t_jawab2']=="QCF"){echo $rowqcf['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryqcf1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='QCF' OR `t_jawab1`='QCF' OR `t_jawab2`='QCF')");
+                    $tqcf=0;
+                    while($rowqcf1=mysql_fetch_array($qryqcf1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowqcf1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowqcf1['t_jawab1']!=""){echo $kgqcf=number_format(($rowqcf1['kg']/2),2)." Kg";}else if($rowqcf1['t_jawab2']!=""){echo $kgqcf=number_format(($rowqcf1['kg']/3),2)." Kg";}else{echo $kgqcf=$rowqcf1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tqcf=$tqcf+$kgqcf;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tqcf,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="PPC"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryppc=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PPC' OR `t_jawab1`='PPC' OR `t_jawab2`='PPC')");
+                $rowppc=mysql_fetch_array($qryppc);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowppc['t_jawab']=="PPC"){echo $rowppc['t_jawab'];}else if($rowppc['t_jawab1']=="PPC"){echo $rowppc['t_jawab1'];}else if($rowppc['t_jawab2']=="PPC"){echo $rowppc['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryppc1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PPC' OR `t_jawab1`='PPC' OR `t_jawab2`='PPC')");
+                    $tppc=0;
+                    while($rowppc1=mysql_fetch_array($qryppc1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowppc1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowppc1['t_jawab1']!=""){echo $kgppc=number_format(($rowppc1['kg']/2),2)." Kg";}else if($rowppc1['t_jawab2']!=""){echo $kgppc=number_format(($rowppc1['kg']/3),2)." Kg";}else{echo $kgppc=$rowppc1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tppc=$tppc+$kgppc;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tppc,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="MKT"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrymkt=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='MKT' OR `t_jawab1`='MKT' OR `t_jawab2`='MKT')");
+                $rowmkt=mysql_fetch_array($qrymkt);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowmkt['t_jawab']=="MKT"){echo $rowmkt['t_jawab'];}else if($rowmkt['t_jawab1']=="MKT"){echo $rowmkt['t_jawab1'];}else if($rowmkt['t_jawab2']=="MKT"){echo $rowmkt['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrymkt1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='MKT' OR `t_jawab1`='MKT' OR `t_jawab2`='MKT')");
+                    $tmkt=0;
+                    while($rowmkt1=mysql_fetch_array($qrymkt1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowmkt1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowmkt1['t_jawab1']!=""){echo $kgmkt=number_format(($rowmkt1['kg']/2),2)." Kg";}else if($rowmkt1['t_jawab2']!=""){echo $kgmkt=number_format(($rowmkt1['kg']/3),2)." Kg";}else{echo $kgmkt=$rowmkt1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tmkt=$tmkt+$kgmkt;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tmkt,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="LAB"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrylab=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='LAB' OR `t_jawab1`='LAB' OR `t_jawab2`='LAB')");
+                $rowlab=mysql_fetch_array($qrylab);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowlab['t_jawab']=="LAB"){echo $rowlab['t_jawab'];}else if($rowlab['t_jawab1']=="LAB"){echo $rowlab['t_jawab1'];}else if($rowlab['t_jawab2']=="LAB"){echo $rowlab['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrylab1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='LAB' OR `t_jawab1`='LAB' OR `t_jawab2`='LAB')");
+                    $tlab=0;
+                    while($rowlab1=mysql_fetch_array($qrylab1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowlab1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowlab1['t_jawab1']!=""){echo $kglab=number_format(($rowlab1['kg']/2),2)." Kg";}else if($rowlab1['t_jawab2']!=""){echo $kglab=number_format(($rowlab1['kg']/3),2)." Kg";}else{echo $kglab=$rowlab1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tlab=$tlab+$kglab;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tlab,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="RMP"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryrmp=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='RMP' OR `t_jawab1`='RMP' OR `t_jawab2`='RMP')");
+                $rowrmp=mysql_fetch_array($qryrmp);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowrmp['t_jawab']=="RMP"){echo $rowrmp['t_jawab'];}else if($rowrmp['t_jawab1']=="RMP"){echo $rowrmp['t_jawab1'];}else if($rowrmp['t_jawab2']=="RMP"){echo $rowrmp['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryrmp1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='RMP' OR `t_jawab1`='RMP' OR `t_jawab2`='RMP')");
+                    $trmp=0;
+                    while($rowrmp1=mysql_fetch_array($qryrmp1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowrmp1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowrmp1['t_jawab1']!=""){echo $kgrmp=number_format(($rowrmp1['kg']/2),2)." Kg";}else if($rowrmp1['t_jawab2']!=""){echo $kgrmp=number_format(($rowrmp1['kg']/3),2)." Kg";}else{echo $kgrmp=$rowrmp1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $trmp=$trmp+$kgrmp;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($trmp,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="PRT"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryprt=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRT' OR `t_jawab1`='PRT' OR `t_jawab2`='PRT')");
+                $rowprt=mysql_fetch_array($qryprt);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowprt['t_jawab']=="PRT"){echo $rowprt['t_jawab'];}else if($rowprt['t_jawab1']=="PRT"){echo $rowprt['t_jawab1'];}else if($rowprt['t_jawab2']=="PRT"){echo $rowprt['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryprt1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2, masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRT' OR `t_jawab1`='PRT' OR `t_jawab2`='PRT')");
+                    $tprt=0;
+                    while($rowprt1=mysql_fetch_array($qryprt1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowprt1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowprt1['t_jawab1']!=""){echo $kgprt=number_format(($rowprt1['kg']/2),2)." Kg";}else if($rowprt1['t_jawab2']!=""){echo $kgprt=number_format(($rowprt1['kg']/3),2)." Kg";}else{echo $kgprt=$rowprt1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tprt=$tprt+$kgprt;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tprt,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="PRO"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrypro=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRO' OR `t_jawab1`='PRO' OR `t_jawab2`='PRO')");
+                $rowpro=mysql_fetch_array($qrypro);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowpro['t_jawab']=="PRO"){echo $rowpro['t_jawab'];}else if($rowpro['t_jawab1']=="PRO"){echo $rowpro['t_jawab1'];}else if($rowpro['t_jawab2']=="PRO"){echo $rowpro['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrypro1=mysql_query("SELECT DISTINCT masalah FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRO' OR `t_jawab1`='PRO' OR `t_jawab2`='PRO')");
+                    $tpro=0;
+                    while($rowpro1=mysql_fetch_array($qrypro1)){
+                        $qrypro2=mysql_query("SELECT t_jawab, t_jawab1, t_jawab2, SUM(kg) as kgpro FROM tbl_detail_retur 
+                        WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah='$rowpro1[masalah]'");
+                        $rowpro2=mysql_fetch_array($qrypro2);
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowpro1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowpro2['t_jawab1']!=""){echo $kgpro=number_format(($rowpro2['kgpro']/2),2)." Kg";}else if($rowpro2['t_jawab2']!=""){echo $kgpro=number_format(($rowpro2['kgpro']/3),2)." Kg";}else{echo $kgpro=$rowpro2['kgpro']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tpro=$tpro+$kgpro;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tpro,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="GKJ"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrygkj=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKJ' OR `t_jawab1`='GKJ' OR `t_jawab2`='GKJ')");
+                $rowgkj=mysql_fetch_array($qrygkj);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowgkj['t_jawab']=="GKJ"){echo $rowgkj['t_jawab'];}else if($rowgkj['t_jawab1']=="GKJ"){echo $rowgkj['t_jawab1'];}else if($rowgkj['t_jawab2']=="GKJ"){echo $rowgkj['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrygkj1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKJ' OR `t_jawab1`='GKJ' OR `t_jawab2`='GKJ')");
+                    $tgkj=0;
+                    while($rowgkj1=mysql_fetch_array($qrygkj1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowgkj1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowgkj1['t_jawab1']!=""){echo $kggkj=number_format(($rowgkj1['kg']/2),2)." Kg";}else if($rowgkj1['t_jawab2']!=""){echo $kggkj=number_format(($rowgkj1['kg']/3),2)." Kg";}else{echo $kggkj=$rowgkj1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tgkj=$tgkj+$kggkj;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tgkj,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="CST"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrycst=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='CST' OR `t_jawab1`='CST' OR `t_jawab2`='CST')");
+                $rowcst=mysql_fetch_array($qrycst);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowcst['t_jawab']=="CST"){echo $rowcst['t_jawab'];}else if($rowcst['t_jawab1']=="CST"){echo $rowcst['t_jawab1'];}else if($rowcst['t_jawab2']=="CST"){echo $rowcst['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrycst1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='CST' OR `t_jawab1`='CST' OR `t_jawab2`='CST')");
+                    $tcst=0;
+                    while($rowcst1=mysql_fetch_array($qrycst1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowcst1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowcst1['t_jawab1']!=""){echo $kgcst=number_format(($rowcst1['kg']/2),2)." Kg";}else if($rowcst1['t_jawab2']!=""){echo $kgcst=number_format(($rowcst1['kg']/3),2)." Kg";}else{echo $kgcst=$rowcst1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tcst=$tcst+$kgcst;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tcst,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="GKG"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrygkg=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur 
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKG' OR `t_jawab1`='GKG' OR `t_jawab2`='GKG')");
+                $rowgkg=mysql_fetch_array($qrygkg);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowgkg['t_jawab']=="GKG"){echo $rowgkg['t_jawab'];}else if($rowgkg['t_jawab1']=="GKG"){echo $rowgkg['t_jawab1'];}else if($rowgkg['t_jawab2']=="GKG"){echo $rowgkg['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrygkg1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKG' OR `t_jawab1`='GKG' OR `t_jawab2`='GKG')");
+                    $tgkg=0;
+                    while($rowgkg1=mysql_fetch_array($qrygkg1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowgkg1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowgkg1['t_jawab1']!=""){echo $kggkg=number_format(($rowgkg1['kg']/2),2)." Kg";}else if($rowgkg1['t_jawab2']!=""){echo $kggkg=number_format(($rowgkg1['kg']/3),2)." Kg";}else{echo $kggkg=$rowgkg1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tgkg=$tgkg+$kggkg;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tgkg,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="KNK"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qryknk=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNK' OR `t_jawab1`='KNK' OR `t_jawab2`='KNK')");
+                $rowknk=mysql_fetch_array($qryknk);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowknk['t_jawab']=="KNK"){echo $rowknk['t_jawab'];}else if($rowknk['t_jawab1']=="KNK"){echo $rowknk['t_jawab1'];}else if($rowknk['t_jawab2']=="KNK"){echo $rowknk['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qryknk1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur 
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNK' OR `t_jawab1`='KNK' OR `t_jawab2`='KNK')");
+                    $tknk=0;
+                    while($rowknk1=mysql_fetch_array($qryknk1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowknk1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowknk1['t_jawab1']!=""){echo $kgknk=number_format(($rowknk1['kg']/2),2)." Kg";}else if($rowknk1['t_jawab2']!=""){echo $kgknk=number_format(($rowknk1['kg']/3),2)." Kg";}else{echo $kgknk=$rowknk1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tknk=$tknk+$kgknk;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tknk,2)." Kg"; ?></strong></td>
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+        <?php if($rCek['t_jawab']=="BRS"){?>
+    <tr>
+        
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <?php
+                $no=1;
+                $Awal=$_GET['awal'];
+                $Akhir=$_GET['akhir'];		
+                $qrybrs=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='BRS' OR `t_jawab1`='BRS' OR `t_jawab2`='BRS')");
+                $rowbrs=mysql_fetch_array($qrybrs);
+            ?>
+            <tr>
+                <td align="left" valign="middle" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><strong><font size="-1">MASALAH <?php if($rowbrs['t_jawab']=="BRS"){echo $rowbrs['t_jawab'];}else if($rowbrs['t_jawab1']=="BRS"){echo $rowbrs['t_jawab1'];}else if($rowbrs['t_jawab2']=="BRS"){echo $rowbrs['t_jawab2'];} ?></font></strong></td>
+            </tr>
+            <tr>
+                <td style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
+                    <?php
+                    $qrybrs1=mysql_query("SELECT t_jawab,t_jawab1,t_jawab2,masalah, kg FROM tbl_detail_retur
+                    WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='BRS' OR `t_jawab1`='BRS' OR `t_jawab2`='BRS')");
+                    $tbrs=0;
+                    while($rowbrs1=mysql_fetch_array($qrybrs1)){
+                    ?>
+                    <tr>
+                        <td width="55%" align="left" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo $rowbrs1['masalah']; ?></strong></td>
+                        <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        <td width="20%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php if($rowbrs1['t_jawab1']!=""){echo $kgbrs=number_format(($rowbrs1['kg']/2),2)." Kg";}else if($rowbrs1['t_jawab2']!=""){echo $kgbrs=number_format(($rowbrs1['kg']/3),2)." Kg";}else{echo $kgbrs=$rowbrs1['kg']." Kg";} ?></strong></td>
+                        <td width="10%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;">&nbsp;</td>
+                        
+                    </tr>
+                    <?php 
+                    $tbrs=$tbrs+$kgbrs;
+                    }?>
+                    <tr>
+                        <td width="75%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;" colspan="3">===========</td>
+                        <td width="25%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;"><strong><?php echo number_format($tbrs,2)." Kg"; ?></strong></td
+                    </tr>
+                </table></td>
+            </tr>
+        </table></td>
+    </tr>
+        <?php }?>
+    <?php }
+    $total=$tdye+$tfin+$tknt+$tqcf+$tlab+$trmp+$tprt+$tpro+$tgkj+$tcst+$tgkg+$tknk+$tbrs;
+    ?>
+    <tr><td><br><br><br><br><br><br></td></tr>
+    <tr>
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <tr>
+                <td width="20%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 13px;" align="right"><strong> TOTAL </strong></td>
+                <td width="30%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"> &nbsp;</td>
+                <td width="30%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 13px;" align="left">&nbsp;</td>
+                <td width="20%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="right"> <strong><?php echo number_format($total,2)." Kg";?> </strong></td>
+            </tr>
+        </table></td>
+    </tr>
+    <tr><td><br><br><br><br><br><br></td></tr>
+    <?php 
+        $qrybss=mysql_query("SELECT SUM(kg) as kgbss, ket FROM tbl_detail_retur 
+        WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND ket LIKE '%BSS%'");
+        $rowbss=mysql_fetch_array($qrybss);
+    ?>
+    <tr>
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <tr>
+                <td width="20%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 11px;" align="left"> KAIN BSS  (Sisa Cutting Loss)</td>
+                <td width="8%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 11px;" align="left"> &nbsp;</td>
+                <td width="10%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="right"><strong><?php if($rowbss['kgbss']!=0 OR $rowbss['kgbss']!=NULL){echo number_format($rowbss['kgbss'],2)." Kg";}else{echo "- &nbsp; &nbsp; Kg";}?> </strong></td>
+                <td width="10%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"> &nbsp;</td>
+            </tr>
+            <?php 
+                $qrybs=mysql_query("SELECT SUM(kg) as kgbs, ket FROM tbl_detail_retur
+                WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND ket LIKE '%BS'");
+                $rowbs=mysql_fetch_array($qrybs);
+            ?>
+            <tr>
+                <td width="20%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 11px;" align="left"> KAIN BS</td>
+                <td width="8%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 11px;" align="left"> &nbsp;</td>
+                <td width="10%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="right"><strong><?php if($rowbs['kgbs']!=0 OR $rowbs['kgbs']!=NULL){echo number_format($rowbs['kgbs'],2)." Kg";}else{echo "- &nbsp; &nbsp; Kg";}?> </strong></td>
+                <td width="10%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"> &nbsp;</td>
+            </tr>
+            <?php 
+            $totbs=$rowbss['kgbss']+$rowbs['kgbs'];
+            ?>
+            <tr>
+                <td width="20%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 11px;" align="left"> &nbsp;</td>
+                <td width="8%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 11px;" align="left"> &nbsp;</td>
+                <td width="10%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="right"><strong>===========</strong></td>
+                <td width="10%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="right"><strong><?php if($totbs!=0 OR $totbs!=NULL){echo number_format($totbs,2)." Kg";}else{echo "- &nbsp; &nbsp; Kg";}?></strong></td>
+            </tr>
+        </table></td>
+    </tr>
+    <tr><td><br><br><br><br><br><br></td></tr>
+    <tr><td><br><br><br><br><br><br></td></tr>
+    <tr>
+        <td align="center"><table border="0" class="table-list1" width="65%">
+            <tr>
+                <td width="5%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"> Total Return :</td>
+                <td width="5%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="right"><?php echo number_format($total,2);?></td>
+                <td width="15%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"><?php echo "KG";?></td>
+            </tr>
+            <tr>
+                <td width="6%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"> Total Kirim :</td>
+                <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><?php echo number_format($TotalKirim,2);?></td></td>
+                <td width="15%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"><?php echo "KG";?></td>
+            </tr>
+            <tr>
+                <td width="6%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left"> Persentase :</td>
+                <td width="5%" align="right" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid;"><?php echo round(($total/$TotalKirim)*100,5)."%";?></td>
+                <td width="15%" style="border-top:0px #000000 solid; 
+                                    border-bottom:0px #000000 solid;
+                                    border-left:0px #000000 solid; 
+                                    border-right:0px #000000 solid; font-size: 12px;" align="left">&nbsp;</td>
+            </tr>
+        </table></td>
+    </tr>
+    <tr>
+      <td align="center"><table border="0" class="table-list1" width="70%">
+        <tr align="center">
+          <td width="20%" >&nbsp;</td>
+          <td width="20%" >Dibuat oleh:</td>
+          <td width="20%" >Diperiksa oleh :</td>
+          <td width="20%" >Diketahui oleh :</td>
+        </tr>
+        <tr>
+          <td>Nama</td>
+          <td align="center"><input name="nama1" type="text" placeholder="Ketik" size="10" /></td>
+          <td align="center">Arif Efendi</td>
+          <td align="center">Agung Cahyono</td>
+        </tr>
+        <tr>
+          <td>Jabatan</td>
+          <td align="center"><input name="nama" type="text" placeholder="Ketik" size="12" /></td>
+          <td align="center">Asst Supervisor</td>
+          <td align="center">Manager</td>
+        </tr>
+        <tr>
+          <td>Tanggal</td>
+          <td align="center"><?php echo date("d-M-y", strtotime($rTgl['tgl_skrg']));?></td>
+          <td align="center"><?php echo date("d-M-y", strtotime($rTgl['tgl_skrg']));?></td>
+          <td align="center"><?php echo date("d-M-y", strtotime($rTgl['tgl_skrg']));?></td>
+        </tr>
+        <tr>
+          <td valign="top" style="height: 0.5in;" >Tanda Tangan</td>
+          <td align="center">&nbsp;</td>
+          <td align="center">&nbsp;</td>
+          <td align="center">&nbsp;</td>
+        </tr>
+      </table></td>
+    </tr>
+</table>
+
+
+<script>
+//alert('cetak');window.print();
+</script> 
+</body>
+</html>

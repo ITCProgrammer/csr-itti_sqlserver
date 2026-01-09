@@ -1,0 +1,1436 @@
+<?php
+$nokk=$_GET[nokk];
+$sql=mssql_query("select top 1
+			x.*,dbo.fn_StockMovementDetails_GetTotalWeightPCC(0, x.PCBID) as Weight, 
+			pm.Weight as Gramasi,pm.CuttableWidth as Lebar, pm.Description as ProductDesc, pm.ColorNo, pm.Color,
+      dbo.fn_StockMovementDetails_GetTotalRollPCC(0, x.PCBID) as RollCount
+		from
+			(
+			select
+				so.SONumber, convert(char(10),so.SODate,103) as TglSO, so.CustomerID, so.BuyerID, so.PODate,
+				sod.ID as SODID, sod.ProductID, sod.Quantity, sod.UnitID, sod.WeightUnitID, 
+				soda.RefNo as DetailRefNo, jo.DocumentNo as NoOrder,soda.PONumber,
+				pcb.ID as PCBID, pcb.Gross as Bruto,soda.HangerNo,pp.ProductCode,
+				pcb.Quantity as BatchQuantity, pcb.UnitID as BatchUnitID, pcb.ScheduledDate, pcb.ProductionScheduledDate,
+				pcblp.DepartmentID,pcb.LotNo,pcb.PCID,pcb.ChildLevel,pcb.RootID,sod.RequiredDate
+				
+			from
+				SalesOrders so inner join
+				JobOrders jo on jo.SOID=so.ID inner join
+				SODetails sod on so.ID = sod.SOID inner join
+				SODetailsAdditional soda on sod.ID = soda.SODID left join
+				ProductPartner pp on pp.productid= sod.productid left join
+				ProcessControlJO pcjo on sod.ID = pcjo.SODID left join
+				ProcessControlBatches pcb on pcjo.PCID = pcb.PCID left join
+				ProcessControlBatchesLastPosition pcblp on pcb.ID = pcblp.PCBID left join
+				ProcessFlowProcessNo pfpn on pfpn.EntryType = 2 and pcb.ID = pfpn.ParentID and pfpn.MachineType = 24 left join
+				ProcessFlowDetailsNote pfdn on pfpn.EntryType = pfdn.EntryType and pfpn.ID = pfdn.ParentID
+			where pcb.DocumentNo='$nokk' and pcb.Gross<>'0'
+				group by
+					so.SONumber, so.SODate, so.CustomerID, so.BuyerID, so.PONumber, so.PODate,jo.DocumentNo,
+					sod.ID, sod.ProductID, sod.Quantity, sod.UnitID, sod.Weight, sod.WeightUnitID,
+					soda.RefNo,pcb.DocumentNo,soda.HangerNo,pp.ProductCode,
+					pcb.ID, pcb.DocumentNo, pcb.Gross,soda.PONumber,
+					pcb.Quantity, pcb.UnitID, pcb.ScheduledDate, pcb.ProductionScheduledDate,
+					pcblp.DepartmentID,pcb.LotNo,pcb.PCID,pcb.ChildLevel,pcb.RootID,sod.RequiredDate
+				) x inner join
+				ProductMaster pm on x.ProductID = pm.ID left join
+				Departments dep on x.DepartmentID  = dep.ID left join
+				Departments pdep on dep.RootID = pdep.ID left join				
+				Partners cust on x.CustomerID = cust.ID left join
+				Partners buy on x.BuyerID = buy.ID left join
+				UnitDescription udq on x.UnitID = udq.ID left join
+				UnitDescription udw on x.WeightUnitID = udw.ID left join
+				UnitDescription udb on x.BatchUnitID = udb.ID
+			order by
+				x.SODID, x.PCBID");
+		  $r=mssql_fetch_array($sql);
+$sql1=mssql_query("select partnername from partners where id='$r[CustomerID]'");	
+$r1=mssql_fetch_array($sql1);
+$sql2=mssql_query("select partnername from partners where id='$r[BuyerID]'");	
+$r2=mssql_fetch_array($sql2);
+$pelanggan=$r1[partnername]."/".$r2[partnername];
+$ko=mssql_query("select  ko.KONo from
+		ProcessControlJO pcjo inner join
+		ProcessControl pc on pcjo.PCID = pc.ID left join
+		KnittingOrders ko on pc.CID = ko.CID and pcjo.KONo = ko.KONo 
+	where
+		pcjo.PCID = '$r[PCID]'
+group by ko.KONo",$conn);
+					$rKO=mssql_fetch_array($ko);
+					
+$child=$r[ChildLevel];
+	if($nokk!=""){	
+		if($child > 0){
+			$sqlgetparent=mssql_query("select ID,LotNo from ProcessControlBatches where ID='$r[RootID]' and ChildLevel='0'");
+			$rowgp=mssql_fetch_assoc($sqlgetparent);
+			
+			//$nomLot=substr("$row2[LotNo]",0,1);
+			$nomLot=$rowgp[LotNo];
+			$nomorLot="$nomLot/K$r[ChildLevel]&nbsp;";				
+								
+		}else{
+			$nomorLot=$r[LotNo];
+				
+		}
+
+		$sqlLot1="Select count(*) as TotalLot From ProcessControlBatches where PCID='$r[PCID]' and RootID='0' and LotNo < '1000'";
+		$qryLot1 = mssql_query($sqlLot1) or die('A error occured : ');							
+		$rowLot=mssql_fetch_assoc($qryLot1);
+		$lotno=$rowLot[TotalLot]."-".$nomorLot;
+		if($r[Quantity]!=""){
+		$x=((($r[Lebar]+2)*$r[Gramasi])/43.06038193629178);
+		$x1=(1000/$x);
+		$yard=$x1*$r[Quantity]; 
+	}
+$sqlpack=mysql_query("SELECT
+	tgl_mulai,jml_netto,netto,panjang,satuan
+FROM
+	`tbl_lap_inspeksi`
+WHERE
+	`nokk` = '$nokk'
+AND `dept` = 'PACKING'
+ORDER BY id DESC LIMIT 1");
+			$sPack=mysql_fetch_array($sqlpack);
+		$sqlinsp=mysql_query("SELECT
+	tgl_update,jml_netto,netto,panjang
+FROM
+	`tbl_lap_inspeksi`
+WHERE
+	`nokk` = '$nokk'
+AND `dept` = 'INSPEK MEJA'
+ORDER BY id DESC LIMIT 1");
+			$sInsp=mysql_fetch_array($sqlinsp);
+$sqlwarna=mysql_query("SELECT
+	tgl_update,`status`
+FROM
+	`tbl_lap_inspeksi`
+WHERE
+	`nokk` = '$nokk'
+AND `dept` = 'QCF'
+ORDER BY id DESC LIMIT 1");
+			$sWarna=mysql_fetch_array($sqlwarna);
+}
+$sqlCek=mysql_query("SELECT * FROM tbl_qcf WHERE nokk='$nokk' LIMIT 1");
+$cek=mysql_num_rows($sqlCek);
+$rcek=mysql_fetch_array($sqlCek);
+?>	
+<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
+ <div class="box box-info">
+   <div class="box-header with-border">
+    <h3 class="box-title">Testing Kartu Kerja</h3>
+    <div class="box-tools pull-right">
+      <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+    </div>
+  </div>
+  <div class="box-body"> 
+	 <div class="col-md-6"> 
+      <div class="form-group">
+                  <label for="no_po" class="col-sm-3 control-label">No KK</label>
+                  <div class="col-sm-4">
+				  <input name="nokk" type="text" class="form-control" id="nokk" 
+                     onchange="window.location='Testing-'+this.value" value="<?php echo $_GET[nokk];?>" placeholder="No KK" required >
+		  </div>
+                </div>
+	           <div class="form-group">
+                  <label for="no_order" class="col-sm-3 control-label">No Order</label>
+                  <div class="col-sm-4">
+                    <input name="no_order" type="text" class="form-control" id="no_order" placeholder="No Order" 
+                    value="<?php if($cek>0){echo $rcek[no_order];}else{echo $r[NoOrder];} ?>" readonly="readonly">
+                  </div>				   
+                </div>
+		 	   <div class="form-group">
+                  <label for="no_po" class="col-sm-3 control-label">Pelanggan</label>
+                  <div class="col-sm-8">
+                    <input name="pelanggan" type="text" class="form-control" id="no_po" placeholder="Pelanggan" 
+                    value="<?php if($cek>0){echo $rcek[pelanggan];}else if($r1[partnername]!=""){echo $pelanggan;}else{}?>" readonly="readonly" >
+                  </div>				   
+                </div>
+	           <div class="form-group">
+                  <label for="no_po" class="col-sm-3 control-label">PO</label>
+                  <div class="col-sm-5">
+                    <input name="no_po" type="text" class="form-control" id="no_po" placeholder="PO" 
+                    value="<?php if($cek>0){echo $rcek[no_po];}else{echo $r[PONumber];} ?>" readonly="readonly" >
+                  </div>				   
+                </div>
+		 		<div class="form-group">
+                  <label for="no_hanger" class="col-sm-3 control-label">No Hanger / No Item</label>
+                  <div class="col-sm-3">
+                    <input name="no_hanger" type="text" class="form-control" id="no_hanger" placeholder="No Hanger" 
+                    value="<?php if($cek>0){echo $rcek[no_hanger];}else{echo $r[HangerNo];}?>" readonly="readonly">  
+                  </div>
+				  <div class="col-sm-3">
+				  <input name="no_item" type="text" class="form-control" id="no_item" placeholder="No Item" 
+                    value="<?php if($rcek[no_item]!=""){echo $rcek[no_item];}else{echo $r[ProductCode];}?>" readonly="readonly">
+				  </div>	
+                </div>
+	            <div class="form-group">
+                  <label for="jns_kain" class="col-sm-3 control-label">Jenis Kain</label>
+                  <div class="col-sm-8">
+					  <textarea name="jns_kain" readonly="readonly" class="form-control" id="jns_kain" placeholder="Jenis Kain"><?php if($cek>0){echo $rcek[jenis_kain];}else{echo $r[ProductDesc];}?></textarea>
+					  </div>
+                  </div>	 		
+		 		
+	  </div>
+	  		<!-- col --> 
+	  <div class="col-md-6">		  
+		 		<div class="form-group">
+                  <label for="l_g" class="col-sm-3 control-label">Lebar X Gramasi</label>
+                  <div class="col-sm-2">
+                    <input name="lebar" type="text" required class="form-control" id="lebar" placeholder="0" 
+                    value="<?php if($cek>0){echo $rcek[lebar];}else{echo round($r[Lebar]);} ?>" readonly="readonly">
+                  </div>
+				  <div class="col-sm-2">
+                    <input name="grms" type="text" required class="form-control" id="grms" placeholder="0" 
+                    value="<?php if($cek>0){echo $rcek[gramasi];}else{echo round($r[Gramasi]);} ?>" readonly="readonly">
+                  </div>		
+                </div>
+		 		<div class="form-group">
+                  <label for="warna" class="col-sm-3 control-label">Warna</label>
+                  <div class="col-sm-8">
+                    <textarea name="warna" readonly="readonly" class="form-control" id="warna" placeholder="Warna"><?php if($cek>0){echo $rcek[warna];}else{echo $r[Color];}?></textarea>
+                  </div>				   
+                </div>
+		 		<div class="form-group">
+                  <label for="no_warna" class="col-sm-3 control-label">No Warna</label>
+                  <div class="col-sm-8">
+                    <textarea name="no_warna" readonly="readonly" class="form-control" id="no_warna" placeholder="No Warna"><?php if($cek>0){echo $rcek[no_warna];}else{echo $r[ColorNo];}?></textarea>
+                  </div>				   
+                </div>
+		 		<div class="form-group">
+                  <label for="lot" class="col-sm-3 control-label">Lot</label>
+                  <div class="col-sm-2">
+                    <input name="lot" type="text" class="form-control" id="lot" placeholder="Lot" 
+                    value="<?php if($cek>0){echo $rcek[lot];}else{echo $lotno;} ?>" readonly="readonly" >
+                  </div>				   
+                </div>
+		  		<div class="form-group">
+                  <label for="suhu" class="col-sm-3 control-label">Suhu</label>
+                  <div class="col-sm-2">
+                    <input name="suhu" type="text" class="form-control" id="suhu" placeholder="Suhu" 
+                    value="<?php if($cek>0){echo $rcek[suhu];}else{} ?>" readonly="readonly" >
+                  </div>				   
+                </div>
+		  		
+	 </div>
+	
+</div>	 
+   <div class="box-footer"> 
+
+   </div>
+    <!-- /.box-footer -->
+  
+
+
+
+
+</div>
+<div class="box box-danger">
+   <div class="box-header with-border">
+    <h3 class="box-title">Detail Testing</h3>
+    <div class="box-tools pull-right">
+      <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+    </div>
+  </div>
+  <div class="box-body"> 
+			<div class="col-md-12">
+				<!-- Custom Tabs -->
+				<div class="nav-tabs-custom">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tab_1" data-toggle="tab">COLORFASTNESS</a></li>
+						<li><a href="#tab_2" data-toggle="tab">PHYSICAL</a></li>
+						<li><a href="#tab_3" data-toggle="tab">FUNCTIONAL</a></li>
+						<li><a href="#tab_4" data-toggle="tab">PH</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="tab_1">
+			  <div class="box-group" id="accordion">
+                <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+                <div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        Color Fastness-Laundering
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseOne" class="panel-collapse collapse">
+                    <div class="box-body">
+					<div class="col-md-4">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Color Change</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Acetate</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Cotton</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Nylon</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-4">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Polyester</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Acrylic</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Wool</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Cross Stain</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	
+					</div>	
+					<div class="col-md-4">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Note</label>
+						<div class="col-sm-8">
+							<textarea class="form-control" placeholder="Test.."></textarea>
+						</div>
+					 </div>	
+					</div>	
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                        Color Fastness-Perspiration-Acid
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTwo" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>  
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                        Color Fastness-Perspiration -Alkali
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseThree" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+                        Color Fastness-Water
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseFour" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
+                        Color Fastness-Saliva
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseFive" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
+                        Color Fastness-Crocking
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseSix" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">DRY</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">WET</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
+                        Color Fastness-Light
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseSeven" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Rat 1</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Rat 2</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseEight">
+                        Color Fastness-Perspiration Light
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseEight" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acid</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Alkali</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseNine">
+                        Color Fastness-Dye Migration
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseNine" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen">
+                        Color Fastness-Chlorine Water
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Bleach</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Perborat</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">peroxide</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>	
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen1">
+                        Bleeding
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen1" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen2">
+                        Color Blocking
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen2" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen3P">
+                        Snagging (Mace)
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen3P" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>  
+              </div>
+						</div>
+						<div class="tab-pane" id="tab_2">
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOneP">
+                        Flammability
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseOneP" class="panel-collapse collapse">
+                    <div class="box-body">
+					<div class="col-md-4">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Color Change</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>
+					<div class="col-md-4">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Note</label>
+						<div class="col-sm-8">
+							<textarea class="form-control" placeholder="Test.."></textarea>
+						</div>
+					 </div>	
+					</div>	
+					<div class="col-md-4">
+					
+					 
+					  
+					  	
+					</div>	
+						
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwoP">
+                        Fiber Content
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTwoP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>  
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThreeP">
+                        Fabric Count
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseThreeP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFourP">
+                        Fabric Weight
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseFourP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFiveP">
+                        Fabric Width
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseFiveP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acetate</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Cotton</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Nylon</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>	 
+					 </div>
+					<div class="col-md-6">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Polyester</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acrylic</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					  <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Wool</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					  </div>
+					</div>
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSixP">
+                        Bow &amp; Skew
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseSixP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">DRY</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">WET</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSevenP">
+                        Shrinkage / Dimensional Stability
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseSevenP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Rat 1</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Rat 2</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseEightP">
+                        Spirality / Skewness
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseEightP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Acid</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Alkali</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseNineP">
+                        Pilling Random Tumbler
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseNineP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Change</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTenP">
+                        Pilling BOX
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTenP" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Bleach</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Perborat</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">peroxide</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>	
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen1P">
+                        Pilling Martindale
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen1P" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen2P">
+                        Abration Resistabce
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen2P" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen3">
+                        Phenolic Yellowing
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTen3" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Color Staining</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>  	
+		  		
+						</div>
+						<div class="tab-pane" id="tab_3">
+		  	  <div class="box-group" id="accordion">
+                <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSevenF">
+                        Vertical Wicking
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseSevenF" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Length</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Width</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Length</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>	
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Width</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 	
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseEightF">
+                        Absorbency
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseEightF" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Original</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Afterwash</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseNineF">
+                        Drying Time
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseNineF" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Original</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Afterwash</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					</div>					
+                    </div>
+                  </div>
+                </div>
+				<div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTenF">
+                       Spray Test
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTenF" class="panel-collapse collapse">
+                    <div class="box-body">
+                    <div class="col-md-6">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Original</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>
+					 <div class="form-group">
+						<label for="no_warna" class="col-sm-3 control-label">Afterwash</label>
+						<div class="col-sm-2">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div>	
+					</div>					
+                    </div>
+                  </div>
+                </div>
+              </div> 	
+						</div>
+						<div class="tab-pane" id="tab_4">
+		  		<div class="box-group" id="accordion">
+                <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+                <div class="panel">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOnePH">
+                        PH
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseOnePH" class="panel-collapse collapse">
+                    <div class="box-body">
+					<div class="col-md-4">	
+                     <div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">PH</label>
+						<div class="col-sm-3">
+							<input name="no_warna" type="text" class="form-control" id="no_warna" placeholder="Test.." value="">
+						</div>
+					 </div></div>
+					<div class="col-md-4">
+					<div class="form-group">
+						<label for="no_warna" class="col-sm-4 control-label">Note</label>
+						<div class="col-sm-8">
+							<textarea class="form-control" placeholder="Test.."></textarea>
+						</div>
+					 </div>
+					</div>	
+					<div class="col-md-4">
+						
+					</div>	
+                    </div>
+                  </div>
+                </div>
+              </div>
+						</div>
+						
+						
+						
+						
+						
+						
+
+					</div>
+					<!-- /.tab-content -->
+				</div>
+				<!-- nav-tabs-custom -->
+			</div>
+			<!-- /.col -->
+		</div>	 
+  <div class="box-footer"> 
+   
+   </div>
+    <!-- /.box-footer -->
+  
+
+
+
+
+</div>	
+</form>
+    
+						
+                    </div>
+                </div>
+            </div>
+        </div>

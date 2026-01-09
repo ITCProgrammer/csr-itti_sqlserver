@@ -1,0 +1,444 @@
+<?php
+$con=mysql_connect("10.0.0.10","dit","4dm1n");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+//--
+$idkk=$_REQUEST['idkk'];
+$act=$_GET['g'];
+$data=mysql_query("SELECT * FROM tbl_tq_nokk WHERE nokk='$idkk' ORDER BY id DESC LIMIT 1");
+$r=mysql_fetch_array($data);
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">
+<title>Cetak Label</title>
+<style>
+	td{
+	border-top:0px #000000 solid; 
+	border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; 
+	border-right:0px #000000 solid;
+	}
+	</style>
+</head>
+
+
+<body>
+<table width="100%" border="0">
+  <tbody>    
+    <tr>
+      <td align="left" valign="top" style="height: 1.6in;"><table width="100%" border="0" class="table-list1" style="width: 2.2in;">
+        <tr>
+          <td colspan="5" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 8px;"><?php echo $r[nokk];?></div></td>
+          </tr>
+        <tr>
+          <td colspan="5" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+              <?php $pos = strpos($r['pelanggan'], "/");
+	  if($pos>0){$pos1=$pos;
+	  $result = substr($r['pelanggan'],0, $pos1);
+	  $pos2=$pos+1;
+	  $result1 = substr($r['pelanggan'], $pos2);}		  
+?>
+            <?php echo substr($result,0,13)."/".substr($result1,0,13);?></div></td>
+          </tr>
+        <tr>
+          <td width="11%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">PO</div></td>
+          <td width="3%" align="center" valign="middle" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[no_po],0,31);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Order</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[no_order];?><?php echo " (".$r[no_item].")";?></div></td>
+          </tr>
+        <tr>
+          <td valign="top" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Jns Kain</div></td>
+          <td valign="top" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:8px;"><?php echo substr($r[jenis_kain],0,31);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Warna</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><span style="font-size:8px;"><?php echo substr($r[warna],0,13)."/".substr($r[no_warna],0,13);?></span></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Fin</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[tgl_fin],0,13)."/".substr($r[proses_fin],0,14);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Lot</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td width="34%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lot];?></div></td>
+          <td width="7%" align="right" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">L&amp;G:</div></td>
+          <td width="45%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lebar]." x ".$r[gramasi];?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Coment</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">&nbsp;</td>
+          </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td align="left" valign="top" style="height: 1.6in;"><table width="100%" border="0" class="table-list1" style="width: 2.3in;">
+        <tr>
+          <td colspan="5" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 8px;"><?php echo $r[nokk];?></div></td>
+        </tr>
+        <tr>
+          <td width="11%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Costumer</div></td>
+          <td width="3%" valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php $pos = strpos($r['pelanggan'], "/");
+	  if($pos>0){$pos1=$pos;
+	  $result = substr($r['pelanggan'],0, $pos1);
+	  $pos2=$pos+1;
+	  $result1 = substr($r['pelanggan'], $pos2);}		  
+?>
+            <?php echo substr($result,0,13)."/".substr($result1,0,13);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">PO</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[no_po],0,31);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Order</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[no_order];?><?php echo " (".$r[no_item].")";?></div></td>
+          </tr>
+        <tr>
+          <td valign="top" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Jns Kain</div></td>
+          <td valign="top" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:8px;"><?php echo substr($r[jenis_kain],0,31);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Warna</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><span style="font-size:8px;"><?php echo substr($r[warna],0,13)."/".substr($r[no_warna],0,13);?></span></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Fin</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[tgl_fin],0,13)."/".substr($r[proses_fin],0,14);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Lot</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td width="34%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lot];?></div></td>
+          <td width="7%" align="right" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">L&amp;G:</div></td>
+          <td width="45%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lebar]." x ".$r[gramasi];?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Coment</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">&nbsp;</td>
+        </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td style="height: 1.6in;"><table width="100%" border="0" class="table-list1" style="width: 2.3in;">
+        <tr>
+          <td colspan="5" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 8px;"><?php echo $r[nokk];?></div></td>
+        </tr>
+        <tr>
+          <td width="11%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Costumer</div></td>
+          <td width="3%" valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php $pos = strpos($r['pelanggan'], "/");
+	  if($pos>0){$pos1=$pos;
+	  $result = substr($r['pelanggan'],0, $pos1);
+	  $pos2=$pos+1;
+	  $result1 = substr($r['pelanggan'], $pos2);}		  
+?>
+            <?php echo substr($result,0,13)."/".substr($result1,0,13);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">PO</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[no_po],0,31);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Order</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[no_order];?><?php echo " (".$r[no_item].")";?></div></td>
+          </tr>
+        <tr>
+          <td valign="top" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Jns Kain</div></td>
+          <td valign="top" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:8px;"><?php echo substr($r[jenis_kain],0,31);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Warna</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><span style="font-size:8px;"><?php echo substr($r[warna],0,13)."/".substr($r[no_warna],0,13);?></span></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Fin</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[tgl_fin],0,13)."/".substr($r[proses_fin],0,14);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Lot</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td width="34%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lot];?></div></td>
+          <td width="7%" align="right" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">L&amp;G:</div></td>
+          <td width="45%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lebar]." x ".$r[gramasi];?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Coment</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">&nbsp;</td>
+        </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td style="height: 1.6in;"><table width="100%" border="0" class="table-list1" style="width: 2.3in;">
+        <tr>
+          <td colspan="5" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 8px;"><?php echo $r[nokk];?></div></td>
+        </tr>
+        <tr>
+          <td width="11%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Costumer</div></td>
+          <td width="3%" valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php $pos = strpos($r['pelanggan'], "/");
+	  if($pos>0){$pos1=$pos;
+	  $result = substr($r['pelanggan'],0, $pos1);
+	  $pos2=$pos+1;
+	  $result1 = substr($r['pelanggan'], $pos2);}		  
+?>
+            <?php echo substr($result,0,13)."/".substr($result1,0,13);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">PO</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[no_po],0,31);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Order</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[no_order];?><?php echo " (".$r[no_item].")";?></div></td>
+          </tr>
+        <tr>
+          <td valign="top" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Jns Kain</div></td>
+          <td valign="top" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:8px;"><?php echo substr($r[jenis_kain],0,31);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Warna</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><span style="font-size:8px;"><?php echo substr($r[warna],0,13)."/".substr($r[no_warna],0,13);?></span></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Fin</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[tgl_fin],0,13)."/".substr($r[proses_fin],0,14);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Lot</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td width="34%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lot];?></div></td>
+          <td width="7%" align="right" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">L&amp;G:</div></td>
+          <td width="45%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lebar]." x ".$r[gramasi];?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Coment</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">&nbsp;</td>
+        </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td style="height: 1.6in;"><table width="100%" border="0" class="table-list1" style="width: 2.3in;">
+        <tr>
+          <td colspan="5" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 8px;"><?php echo $r[nokk];?></div></td>
+        </tr>
+        <tr>
+          <td width="11%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Costumer</div></td>
+          <td width="3%" valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php $pos = strpos($r['pelanggan'], "/");
+	  if($pos>0){$pos1=$pos;
+	  $result = substr($r['pelanggan'],0, $pos1);
+	  $pos2=$pos+1;
+	  $result1 = substr($r['pelanggan'], $pos2);}		  
+?>
+            <?php echo substr($result,0,13)."/".substr($result1,0,13);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">PO</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[no_po],0,31);?></div></td>
+          </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Order</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[no_order];?><?php echo " (".$r[no_item].")";?></div></td>
+          </tr>
+        <tr>
+          <td valign="top" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Jns Kain</div></td>
+          <td valign="top" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:8px;"><?php echo substr($r[jenis_kain],0,31);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Warna</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><span style="font-size:8px;"><?php echo substr($r[warna],0,13)."/".substr($r[no_warna],0,13);?></span></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Fin</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo substr($r[tgl_fin],0,13)."/".substr($r[proses_fin],0,14);?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size: 9px;">Lot</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td width="34%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lot];?></div></td>
+          <td width="7%" align="right" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">L&amp;G:</div></td>
+          <td width="45%" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo $r[lebar]." x ".$r[gramasi];?></div></td>
+        </tr>
+        <tr>
+          <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">Coment</div></td>
+          <td valign="middle" align="center" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">:</td>
+          <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
+	border-left:0px #000000 solid; border-right:0px #000000 solid;">&nbsp;</td>
+        </tr>
+      </table></td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<?php 
+$con=mysql_connect("10.0.0.10","dit","4dm1n");
+$db=mysql_select_db("db_qc",$con)or die("Gagal Koneksi");
+//--
+$AwalP1=$_GET['awalp1'];
+$AkhirP1=$_GET['akhirp1'];
+$AwalP2=$_GET['awalp2'];
+$AkhirP2=$_GET['akhirp2'];
+$ProDye=$_GET['prodye'];
+$ProBrs=$_GET['probrs'];
+$ProPrt=$_GET['proprt'];
+$ProDye1=$_GET['prodye1'];
+$ProBrs1=$_GET['probrs1'];
+$ProPrt1=$_GET['proprt1'];
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="styles_cetak.css" rel="stylesheet" type="text/css">
+<title>Cetak 6 Bulanan NCP</title>
+<script>
+
+// set portrait orientation
+
+jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
+
+// set top margins in millimeters
+jsPrintSetup.setOption('marginTop', 0);
+jsPrintSetup.setOption('marginBottom', 0);
+jsPrintSetup.setOption('marginLeft', 0);
+jsPrintSetup.setOption('marginRight', 0);
+
+// set page header
+jsPrintSetup.setOption('headerStrLeft', '');
+jsPrintSetup.setOption('headerStrCenter', '');
+jsPrintSetup.setOption('headerStrRight', '');
+
+// set empty page footer
+jsPrintSetup.setOption('footerStrLeft', '');
+jsPrintSetup.setOption('footerStrCenter', '');
+jsPrintSetup.setOption('footerStrRight', '');
+
+// clears user preferences always silent print value
+// to enable using 'printSilent' option
+jsPrintSetup.clearSilentPrint();
+
+// Suppress print dialog (for this context only)
+jsPrintSetup.setOption('printSilent', 1);
+
+// Do Print 
+// When print is submitted it is executed asynchronous and
+// script flow continues after print independently of completetion of print process! 
+jsPrintSetup.print();
+
+window.addEventListener('load', function () {
+    var rotates = document.getElementsByClassName('rotate');
+    for (var i = 0; i < rotates.length; i++) {
+        rotates[i].style.height = rotates[i].offsetWidth + 'px';
+    }
+});
+// next commands
+
+</script>
+<style>
+.hurufvertical {
+ writing-mode:tb-rl;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+    transform: rotate(180deg);
+    white-space:nowrap;
+    float:left;
+}	
+
+input{
+text-align:center;
+border:hidden;
+}
+@media print {
+  ::-webkit-input-placeholder { /* WebKit browsers */
+      color: transparent;
+  }
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color: transparent;
+  }
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color: transparent;
+  }
+  :-ms-input-placeholder { /* Internet Explorer 10+ */
+      color: transparent;
+  }
+  .pagebreak { page-break-before:always; }
+  .header {display:block}
+  table thead 
+   {
+    display: table-header-group;
+   }
+}	
+</style>	
+</head>
+<body>
+<table width="100%">
+<thead>
+    <tr>
+        <td><table width="100%" border="1" class="table-list1"> 
+            <tr>
+                <td align="center"><strong><font size="+1">LAPORAN 6 BULANAN NCP</font><br />
+                <font size="-1">BULAN: <?php echo strtoupper(date("F", strtotime($AwalP1)));?> s/d <?php echo strtoupper(date("F", strtotime($AkhirP1)));?> TAHUN <?php echo date("Y", strtotime($AwalP1));?></font>
+                <br />
+                </strong></td>
+            </tr>
+        </table></td>
+    </tr>
+</thead>
+    <tr>
+        <td><table width="100%" border="1" class="table-list1">
+            <!--<thead>
+                <tr align="center">
+                    <td colspan="2"><font size="-2"><strong>&nbsp;</strong></font></td>
+                    <td colspan="2"><font size="-2"><strong><?php echo date("F", strtotime($AwalP1));?>-<?php echo date("F Y", strtotime($AkhirP1));?></strong></font></td>
+                    <td colspan="2"><font size="-2"><strong><?php echo date("F", strtotime($AwalP2));?>-<?php echo date("F Y", strtotime($AkhirP2));?></strong></font></td>
+                </tr>
+            </thead>-->
+            <tbody>
+                <?php 
+                $qryDept=mysql_query("SELECT DISTINCT dept FROM tbl_ncp_qcf 
+                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$AwalP1' AND '$AkhirP1'");
+                while($rDept=mysql_fetch_array($qryDept)){
+                ?>
+                    <?php if($rDept['dept']=="DYE"){?>
+                    <tr>
+                        <td align="left"><strong>1. DYE</strong></td>
+                        <td><font size="-2"><strong><?php echo date("F", strtotime($AwalP1));?>-<?php echo date("F Y", strtotime($AkhirP1));?></strong></font></td>
+                        <td><font size="-2"><strong><?php echo date("F", strtotime($AwalP2));?>-<?php echo date("F Y", strtotime($AkhirP2));?></strong></font></td>
+                    </tr>
+                    <tr>
+                        <td><table border="0" class="table-list1" width="100%">
+                            <?php
+                            $tDye=0;
+                            $tDye1=0;
+                            $tDye2=0;
+                            $tDye3=0;
+                            $qryAllDye=mysql_query("SELECT SUM(berat) AS berat_all FROM tbl_ncp_qcf
+                            WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d') BETWEEN '$AwalP1' AND '$AkhirP1'
+                            AND `dept`='DYE' AND (masalah_dominan!=NULL OR masalah_dominan!='')");
+                            $rAllDye=mysql_fetch_array($qryAllDye);
+                            $qryAllDye1=mysql_query("SELECT SUM(berat) AS berat_all FROM tbl_ncp_qcf
+                            WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d') BETWEEN '$AwalP2' AND '$AkhirP2'
+                            AND `dept`='DYE' AND (masalah_dominan!=NULL OR masalah_dominan!='')");
+                            $rAllDye1=mysql_fetch_array($qryAllDye1);
+                            $qryDye=mysql_query("SELECT DISTINCT masalah_dominan, SUM(berat) AS berat FROM tbl_ncp_qcf
+                            WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d') BETWEEN '$AwalP1' AND '$AkhirP1'
+                            AND `dept`='DYE' AND (masalah_dominan!=NULL OR masalah_dominan!='')
+                            GROUP BY masalah_dominan
+                            ORDER BY berat DESC LIMIT 5");
+                            while($rDye=mysql_fetch_array($qryDye)){
+                                $qryDye1=mysql_query("SELECT SUM(berat) AS berat
+                                FROM tbl_ncp_qcf
+                                WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d') BETWEEN '$AwalP2' AND '$AkhirP2'
+                                AND `dept`='DYE' AND masalah_dominan='$rDye[masalah_dominan]'");
+                                $rDye1=mysql_fetch_array($qryDye1);
+                            ?>
+                            <tr>
+                                <td align="left"><?php echo $rDye['masalah_dominan']; ?></td>
+                                <td align="left"><?php echo $rDye['berat']; ?></td>
+                                <td align="left">Kg</td>
+                                <td align="left"><?php echo number_format(($rDye['berat']/$ProDye)*100,2); ?></td>
+                                <td align="left">%</td>
+                                <td align="left"><?php echo $rDye1['berat']; ?></td>
+                                <td align="left">Kg</td>
+                                <td align="left"><?php echo number_format(($rDye1['berat']/$ProDye1)*100,2); ?></td>
+                                <td align="left">%</td>
+                            </tr>
+                            <?php 
+                            $tDye=$tDye+$rDye['berat'];
+                            $tDye2=$tDye2+$rDye1['berat'];
+                            } 
+                            $tDye1=number_format($rAllDye['berat_all']-$tDye,2);
+                            $tDye3=number_format($rAllDye1['berat_all']-$tDye2,2);?>
+                            <tr>
+                                <td align="left">LAIN LAIN</td>
+                                <td align="left"><?php echo $tDye1; ?></td>
+                                <td align="left">Kg</td>
+                                <td align="left"><?php echo number_format(($tDye1/$ProDye)*100,2); ?></td>
+                                <td align="left">%</td>
+                                <td align="left"><?php echo $tDye3; ?></td>
+                                <td align="left">Kg</td>
+                                <td align="left"><?php echo number_format(($tDye3/$ProDye1)*100,2); ?></td>
+                                <td align="left">%</td>
+                            </tr>
+                            <tr>
+                                <td align="left">TOTAL</td>
+                                <td align="left"><?php echo $rAllDye['berat_all']; ?></td>
+                                <td align="left">Kg</td>
+                                <td align="left"><?php echo number_format(($rAllDye['berat_all']/$ProDye)*100,2); ?></td>
+                                <td align="left">%</td>
+                                <td align="left"><?php echo $rAllDye1['berat_all']; ?></td>
+                                <td align="left">Kg</td>
+                                <td align="left"><?php echo number_format(($rAllDye1['berat_all']/$ProDye1)*100,2); ?></td>
+                                <td align="left">%</td>
+                            </tr>
+                        </table></td>
+                        <td align="left"><strong>A</strong></td>
+                        <td align="left"><strong>B</strong></td>
+                    </tr>
+                    <?php } ?>
+                <?php } ?>
+            </tbody>
+        </table></td>
+    </tr>
+</table>
+</body>
+</html>
