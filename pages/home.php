@@ -246,156 +246,7 @@ $page = strtolower($page);
             </div>
           </a>
         </div>
-        <!-- Aftersales NOW Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="AftersalesNOW">
-            <div class="info-box">
-              <span class="info-box-icon bg-navy"><i class="fa fa-clock-o"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">Aftersales NOW</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Summary Order Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="SummaryOrder">
-            <div class="info-box">
-              <span class="info-box-icon bg-teal"><i class="fa fa-check"></i></span>
-              <?php
-              include('koneksi.php');
-              // Fetch data for Team A
-              $sqldt = mysqli_query($con, "SELECT COUNT(*) AS jml_a FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Darien' OR sales='Gilang Kurnia' OR sales='Vany Leany' OR sales='Thania' OR sales='Viviani' OR sales='Heri' OR sales='Bunbun' OR sales='Frans' OR sales='Fransiska') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-              $row = mysqli_fetch_array($sqldt);
-              // Fetch data for Team B
-              $sqldt1 = mysqli_query($con, "SELECT COUNT(*) AS jml_b FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Roni' OR sales='Deden' OR sales='Rangga Aditya' OR sales='Nia') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-              $row1 = mysqli_fetch_array($sqldt1);
-              // Fetch data for Team C
-              $sqldt2 = mysqli_query($con, "SELECT COUNT(*) AS jml_c FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Ridwan' OR sales='Ikhsan Ikhwana' OR sales='Bambang' OR sales='Budiman' OR sales='Dennis' OR sales='Levia Zhuang' OR sales=' Kevin Noventin' OR sales='Fahrurrozi' OR sales='Richard' OR sales='Yohanes') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-              $row2 = mysqli_fetch_array($sqldt2);
-              ?>
-              <div class="info-box-content">
-          <span class="info-box-text">Bon Penghubung</span>
-          <span class="label bg-red blink_me">Team A =
-            <?php echo $row['jml_a']; ?>
-          </span><br>
-          <span class="label bg-red blink_me">Team B =
-            <?php echo $row1['jml_b']; ?>
-          </span><br>
-          <span class="label bg-red blink_me">Team C =
-            <?php echo $row2['jml_c']; ?>
-          </span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Input Disposisi QC Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="InputDisposisiDetail">
-            <div class="info-box">
-              <span class="info-box-icon bg-red"><i class="fa fa-pencil-square-o"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">Input Disposisi QC</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Library Disposisi QC Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="DisposisiNOW">
-            <div class="info-box">
-              <span class="info-box-icon bg-purple"><i class="fa fa-signal"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">Library Disposisi QC</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Inspection Report NOW Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="InspectionReportNOW">
-            <div class="info-box">
-              <span class="info-box-icon bg-maroon"><i class="fa fa-search-plus"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">Inspection Report NOW</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Data Pengiriman NOW Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="DataPengirimanNOW">
-            <div class="info-box">
-              <span class="info-box-icon bg-pink"><i class="fa fa-truck"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">Data Pengiriman NOW</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Persediaan NOW Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="PersediaanNOW">
-            <div class="info-box">
-              <span class="info-box-icon bg-lime"><i class="fa fa-database"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">Persediaan NOW</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
-
-        <!-- Input Data TPU KPE Section -->
-        <!--
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          <a href="InputDataAPTPUKPE">
-            <div class="info-box">
-              <span class="info-box-icon bg-green"><i class="fa fa-pencil-square-o"></i></span>
-              <div class="info-box-content">
-          <span class="info-box-text">INPUT DATA TPU KPE</span>
-          <span class="info-box-number">&nbsp;</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        -->
       <?php  }} ?>
-
         <?php if($_SESSION['usrid'] == 'ppc' ||$_SESSION['dept'] == 'MKT'){ ?>
         <div class="col-md-3 col-sm-6 col-xs-12">
           <a href="Newbonpenghubung">
@@ -425,51 +276,48 @@ $page = strtolower($page);
           </a>
         </div>
         <?php } ?>
-        
       <?php if ($_SESSION['lvl_id'] != "DMF" and $_SESSION['lvl_id'] != "TQ" and $_SESSION['lvl_id'] != "SPVQC" and $_SESSION['lvl_id'] != "AFTERSALES") { ?>
-
-
         <!-- jika username marketing hidden -->
         <?php if ($_SESSION['dept'] != "MKT" && $_SESSION['usrid'] != "ppc") { ?>
           <div class="col-md-3 col-sm-6 col-xs-12">
             <a href="SummaryOrder">
               <div class="info-box">
                 <span class="info-box-icon bg-teal"><i class="fa fa-check"></i></span>
-                <?php
+                <?php 
                 include('koneksi.php');
 
                 // TIM A
-                $sqldt = mysqli_query($con, "
+                $sqldt = sqlsrv_query($con, "
                   SELECT COUNT(*) AS jml_a 
-                  FROM tbl_qcf 
+                  FROM db_qc.tbl_qcf 
                   WHERE sts_pbon='1' 
                     AND sts_aksi IS NULL 
                     AND (sales IN ('Darien', 'Gilang Kurnia', 'Vany Leany', 'Thania', 'Viviani', 'Heri', 'Bunbun', 'Frans', 'Fransiska')) 
-                    AND DATE_FORMAT(tgl_masuk, '%Y-%m-%d') BETWEEN '2021-01-01' AND NOW()
+                    AND CAST(tgl_masuk AS date) BETWEEN '2021-01-01' AND CAST(GETDATE() AS date)
                 ");
-                $row = mysqli_fetch_array($sqldt);
+                $row = sqlsrv_fetch_array($sqldt, SQLSRV_FETCH_ASSOC);
 
                 // TIM B
-                $sqldt1 = mysqli_query($con, "
+                $sqldt1 = sqlsrv_query($con, "
                   SELECT COUNT(*) AS jml_b 
-                  FROM tbl_qcf 
+                  FROM db_qc.tbl_qcf 
                   WHERE sts_pbon='1' 
                     AND sts_aksi IS NULL 
                     AND (sales IN ('Roni', 'Deden', 'Rangga Aditya', 'Nia')) 
-                    AND DATE_FORMAT(tgl_masuk, '%Y-%m-%d') BETWEEN '2021-01-01' AND NOW()
+                    AND CAST(tgl_masuk AS date) BETWEEN '2021-01-01' AND CAST(GETDATE() AS date)
                 ");
-                $row1 = mysqli_fetch_array($sqldt1);
+                $row1 = sqlsrv_fetch_array($sqldt1, SQLSRV_FETCH_ASSOC);
 
                 // TIM C
-                $sqldt2 = mysqli_query($con, "
+                $sqldt2 = sqlsrv_query($con, "
                   SELECT COUNT(*) AS jml_c 
-                  FROM tbl_qcf 
+                  FROM db_qc.tbl_qcf 
                   WHERE sts_pbon='1' 
                     AND sts_aksi IS NULL 
                     AND (sales IN ('Ridwan', 'Ikhsan Ikhwana', 'Bambang', 'Budiman', 'Dennis', 'Levia Zhuang', 'Kevin Noventin', 'Fahrurrozi', 'Richard', 'Yohanes')) 
-                    AND DATE_FORMAT(tgl_masuk, '%Y-%m-%d') BETWEEN '2021-01-01' AND NOW()
+                    AND CAST(tgl_masuk AS date) BETWEEN '2021-01-01' AND CAST(GETDATE() AS date)
                 ");
-                $row2 = mysqli_fetch_array($sqldt2);
+                $row2 = sqlsrv_fetch_array($sqldt2, SQLSRV_FETCH_ASSOC);
                 ?>
                 <div class="info-box-content">
                   <span class="info-box-text">Bon Penghubung</span>
@@ -691,11 +539,11 @@ $page = strtolower($page);
               <?php
               include('koneksi.php');
               $delay = date('Y-m-d');
-              $sqldt = mysqli_query($con, "SELECT COUNT(*) as cnt FROM tbl_tq_nokk a
+              $sqldt = sqlsrv_query($con, "SELECT COUNT(*) as cnt FROM tbl_tq_nokk a
             LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk
-            WHERE (`status`='' or `status` IS NULL) AND DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN DATE_SUB(NOW(),INTERVAL 30 DAY) AND NOW() AND tgl_target < '$delay'
+            WHERE ([status]='' or [status] IS NULL) AND CAST(tgl_masuk AS date) BETWEEN CAST(DATEADD(day, -30, GETDATE()) AS date) AND CAST(GETDATE() AS date) AND tgl_target < '$delay'
             ");
-              $row = mysqli_fetch_array($sqldt);
+              $row = sqlsrv_fetch_array($sqldt, SQLSRV_FETCH_ASSOC);
               ?>
               <div class="info-box-content">
                 <span class="info-box-text">Status Test Quality</span>
@@ -711,4 +559,4 @@ $page = strtolower($page);
   </section>
 </body>
 </html>
-<?php mysqli_close($con); ?>
+<?php sqlsrv_close($con); ?>

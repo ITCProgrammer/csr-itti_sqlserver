@@ -22,7 +22,23 @@ else{
     exit("DB2 Connection failed");
 }
 
-$con=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
+$hostSVR19    = "10.0.0.221";
+$usernameSVR19 = "sa";
+$passwordSVR19 = "Ind@taichen2024";
+$db_qc     = "db_qc";
+
+$db_qc = array(
+    "Database" => $db_qc,
+    "UID"      => $usernameSVR19,
+    "PWD"      => $passwordSVR19,
+);
+
+$con = sqlsrv_connect($hostSVR19, $db_qc);
+
+if ($con === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+// $con=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
 // $con=mysqli_connect("localhost","root","","db_qc");
 $condye=mysqli_connect("10.0.0.10","dit","4dm1n","db_dying");
 $conlab=mysqli_connect("10.0.0.10","dit","4dm1n","db_laborat");

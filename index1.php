@@ -186,10 +186,10 @@ $page = strtolower($page);
                 <!-- Navbar Right Menu -->
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
-                        <?php $qryNCP = mysqli_query($con, "SELECT COUNT(*) as jml from tbl_ncp_qcf WHERE ISNULL(tgl_rencana) $Wdept AND status='Belum OK'");
-                        $rNCP = mysqli_fetch_array($qryNCP);
+                        <?php 
+                            $qryNCP = sqlsrv_query($con, "SELECT COUNT(*) AS jml FROM db_qc.tbl_ncp_qcf WHERE tgl_rencana IS NULL AND status='Belum OK' $Wdept");
+                            $rNCP = sqlsrv_fetch_array($qryNCP);
                         ?>
-
                         <!-- Notifications Menu -->
                         <li class="dropdown notifications-menu">
                             <!-- Menu toggle button -->
@@ -203,8 +203,8 @@ $page = strtolower($page);
                                 <li>
                                     <!-- Inner Menu: contains the notifications -->
                                     <ul class="menu">
-                                        <?php $qryNCP1 = mysqli_query($con, "SELECT no_ncp FROM tbl_ncp_qcf WHERE ISNULL(tgl_rencana) $Wdept AND status='Belum OK'");
-                                        while ($rNCP1 = mysqli_fetch_array($qryNCP1)) {
+                                        <?php $qryNCP1 = sqlsrv_query($con, "SELECT no_ncp FROM db_qc.tbl_ncp_qcf WHERE tgl_rencana IS NULL $Wdept AND status='Belum OK'");
+                                        while ($rNCP1 = sqlsrv_fetch_array($qryNCP1)) {
                                             ?>
                                             <li><!-- start notification -->
                                                 <a href="StatusNCP">
@@ -219,18 +219,17 @@ $page = strtolower($page);
                                 <li class="footer"><a href="StatusNCP">Tampil Semua</a></li>
                             </ul>
                         </li>
-                        <?php $qryNCP2 = mysqli_query($con, "SELECT
-                                                           
+                        <?php $qryNCP2 = sqlsrv_query($con, "SELECT
                                                                     COUNT(*) AS jml 
                                                                 FROM
-                                                                    tbl_ncp_qcf 
+                                                                    db_qc.tbl_ncp_qcf 
                                                                 WHERE
-                                                                    NOT ISNULL( tgl_rencana ) $Wdept 
+                                                                    tgl_rencana IS NOT NULL $Wdept 
                                                                     AND STATUS = 'Belum OK' 
                                                                     AND (
                                                                     penyelesaian = '' 
-                                                                    OR ISNULL( penyelesaian ))");
-                        $rNCP2 = mysqli_fetch_array($qryNCP2);
+                                                                    OR penyelesaian IS NULL )");
+                        $rNCP2 = sqlsrv_fetch_array($qryNCP2);
                         ?>
 
                         <!-- Tasks Menu -->
@@ -247,17 +246,17 @@ $page = strtolower($page);
                                 <li>
                                     <!-- Inner menu: contains the tasks -->
                                     <ul class="menu">
-                                        <?php $qryNCP3 = mysqli_query($con, "SELECT
+                                        <?php $qryNCP3 = sqlsrv_query($con, "SELECT
                                                                                     no_ncp 
                                                                                 FROM
-                                                                                    tbl_ncp_qcf 
+                                                                                    db_qc.tbl_ncp_qcf 
                                                                                 WHERE
-                                                                                    NOT ISNULL( tgl_rencana ) $Wdept 
+                                                                                    tgl_rencana IS NOT NULL $Wdept 
                                                                                     AND STATUS = 'Belum OK' 
                                                                                     AND (
                                                                                     penyelesaian = '' 
-                                                                                    OR ISNULL( penyelesaian ))");
-                                        while ($rNCP3 = mysqli_fetch_array($qryNCP3)) {
+                                                                                    OR penyelesaian IS NULL )");
+                                        while ($rNCP3 = sqlsrv_fetch_array($qryNCP3)) {
                                             ?>
                                             <li><!-- Task item -->
                                                 <a href="StatusNCP">
@@ -290,15 +289,15 @@ $page = strtolower($page);
                                 </li>
                             </ul>
                         </li>
-                        <?php $qryNCP4 = mysqli_query($con, "SELECT
+                        <?php $qryNCP4 = sqlsrv_query($con, "SELECT
                                                                     COUNT(*) AS jml 
                                                                 FROM
-                                                                    tbl_ncp_qcf 
+                                                                    db_qc.tbl_ncp_qcf 
                                                                 WHERE
-                                                                    NOT ISNULL( tgl_rencana ) $Wdept 
+                                                                    tgl_rencana IS NOT NULL $Wdept 
                                                                     AND STATUS = 'Belum OK' 
                                                                     AND NOT penyelesaian = ''");
-                        $rNCP4 = mysqli_fetch_array($qryNCP4);
+                        $rNCP4 = sqlsrv_fetch_array($qryNCP4);
                         ?>
                         <!-- Revisi Menu -->
                         <li class="dropdown tasks-menu">
@@ -314,15 +313,15 @@ $page = strtolower($page);
                                 <li>
                                     <!-- Inner menu: contains the tasks -->
                                     <ul class="menu">
-                                        <?php $qryNCP5 = mysqli_query($con, "SELECT
+                                        <?php $qryNCP5 = sqlsrv_query($con, "SELECT
                                                                                 no_ncp 
                                                                             FROM
-                                                                                tbl_ncp_qcf 
+                                                                                db_qc.tbl_ncp_qcf 
                                                                             WHERE
-                                                                                NOT ISNULL( tgl_rencana ) $Wdept 
+                                                                                tgl_rencana IS NOT NULL $Wdept 
                                                                                 AND STATUS = 'Belum OK' 
                                                                                 AND NOT penyelesaian = ''");
-                                        while ($rNCP5 = mysqli_fetch_array($qryNCP5)) { ?>
+                                        while ($rNCP5 = sqlsrv_fetch_array($qryNCP5)) { ?>
                                             <li><!-- Task item -->
                                                 <a href="#">
                                                     <!-- Task title and progress text -->
@@ -394,7 +393,6 @@ $page = strtolower($page);
                         </li> -->
                     </ul>
                 </div>
-
             </nav>
         </header>
         <!-- Left side column. contains the logo and sidebar -->
@@ -3693,6 +3691,73 @@ $page = strtolower($page);
 
     <script src="dist/js/adminlte.min.js"></script>
     <script>
+        (function () {
+            function ready(fn) {
+                if (document.readyState !== 'loading') {
+                    fn();
+                    return;
+                }
+                document.addEventListener('DOMContentLoaded', fn);
+            }
+
+            function initSidebarToggle() {
+                var toggles = document.querySelectorAll('[data-toggle="push-menu"]');
+                if (!toggles.length) {
+                    return;
+                }
+                toggles.forEach(function (toggle) {
+                    toggle.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        document.body.classList.toggle('sidebar-collapse');
+                    });
+                });
+            }
+
+            function initDropdownFallback() {
+                var toggles = document.querySelectorAll('.navbar .dropdown-toggle');
+                if (!toggles.length) {
+                    return;
+                }
+                toggles.forEach(function (toggle) {
+                    toggle.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var parent = toggle.closest('.dropdown');
+                        if (!parent) {
+                            return;
+                        }
+                        var isOpen = parent.classList.contains('open');
+                        document.querySelectorAll('.navbar .dropdown.open').forEach(function (el) {
+                            el.classList.remove('open');
+                        });
+                        if (!isOpen) {
+                            parent.classList.add('open');
+                        }
+                    });
+                });
+                document.addEventListener('click', function (e) {
+                    if (!e.target.closest('.navbar .dropdown')) {
+                        document.querySelectorAll('.navbar .dropdown.open').forEach(function (el) {
+                            el.classList.remove('open');
+                        });
+                    }
+                });
+            }
+
+            ready(function () {
+                var hasJq = window.jQuery && window.jQuery.fn;
+                var hasPushMenu = hasJq && typeof window.jQuery.fn.pushMenu === 'function';
+                var hasDropdown = hasJq && typeof window.jQuery.fn.dropdown === 'function';
+                if (!hasPushMenu) {
+                    initSidebarToggle();
+                }
+                if (!hasDropdown) {
+                    initDropdownFallback();
+                }
+            });
+        })();
+    </script>
+    <script>
         $(function () {
             // Replace the <textarea id="editor1"> with a CKEditor
             // instance, using default configuration.
@@ -3813,4 +3878,3 @@ $page = strtolower($page);
 
         });
     </script>
-    

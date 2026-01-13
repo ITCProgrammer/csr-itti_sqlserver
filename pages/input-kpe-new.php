@@ -162,10 +162,10 @@ if(!empty($nodemand)){
 
 	$dt_penghubung = "SELECT 
 					* 
-					FROM tbl_qcf
+					FROM db_qc.tbl_qcf
 					WHERE nodemand ='$nodemand'";
-	$exec = mysqli_query($con,$dt_penghubung );
-	$penghubung = mysqli_fetch_array($exec);
+	$exec = sqlsrv_query($con,$dt_penghubung );
+	$penghubung = sqlsrv_fetch_array($exec, SQLSRV_FETCH_ASSOC);
 } else {
 	'';
 }
@@ -177,17 +177,23 @@ $valgramasi = substr($rowdb2['GRAMASI'], 0, $posg);
 $posl = strpos($rowdb2['LEBAR'], ".");
 $vallebar = substr($rowdb2['LEBAR'], 0, $posl);
 
-$sqlCek = mysqli_query($con, "SELECT a.*,
-												GROUP_CONCAT( DISTINCT b.no_ncp SEPARATOR ', ' ) AS no_ncp,
-												GROUP_CONCAT( DISTINCT b.masalah SEPARATOR ', ' ) AS masalah_ncp 
-												FROM tbl_aftersales_now a LEFT JOIN tbl_ncp_qcf b ON a.nodemand=b.nodemand WHERE a.nodemand='$nodemand'
-												GROUP BY a.nodemand
-											ORDER BY a.id DESC LIMIT 1");
-// if(!$sqlCek || mysqli_num_rows($sqlCek) == 0){
-// 	$cek=mysqli_num_rows($sqlCek);
+$sqlCek = sqlsrv_query($con, "SELECT TOP 1 a.*,
+												STUFF((SELECT DISTINCT ', ' + b2.no_ncp
+														FROM  db_qc.tbl_ncp_qcf b2
+														WHERE b2.nodemand = a.nodemand
+														FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS no_ncp,
+												STUFF((SELECT DISTINCT ', ' + b3.masalah
+														FROM  db_qc.tbl_ncp_qcf b3
+														WHERE b3.nodemand = a.nodemand
+														FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS masalah_ncp
+												FROM  db_qc.tbl_aftersales_now a
+												WHERE a.nodemand='$nodemand'
+											ORDER BY a.id DESC");
+// if(!$sqlCek || !sqlsrv_has_rows($sqlCek)){
+// 	$cek=0;
 // }
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$cek = ($sqlCek && sqlsrv_has_rows($sqlCek)) ? 1 : 0;
+$rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
 	<div class="box box-info">
@@ -213,12 +219,13 @@ $rcek = mysqli_fetch_array($sqlCek);
 						<?php
 						if ($cek > 0) {
 							// echo "Sudah Input Pada Tgl: " . $rcek['tgl_buat'] . " | ";
-							$qm = mysqli_query($con, "SELECT 
-															group_concat(masalah_dominan) as masalah_dominan
-														from tbl_aftersales_now
-														where nodemand = '$_GET[nodemand]'
-														group by nodemand");
-							$riqm = mysqli_fetch_array($qm);
+							$qm = sqlsrv_query($con, "SELECT STUFF((
+															SELECT ',' + masalah_dominan
+															FROM  db_qc.tbl_aftersales_now
+															WHERE nodemand = '$_GET[nodemand]'
+															FOR XML PATH(''), TYPE
+														).value('.', 'nvarchar(max)'), 1, 1, '') AS masalah_dominan");
+							$riqm = sqlsrv_fetch_array($qm, SQLSRV_FETCH_ASSOC);
 							echo "Sudah Input : (" . $riqm['masalah_dominan'] . ") | ";
 						}
 						if (!empty($rcek['no_ncp'])) {
@@ -576,8 +583,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<option value="">Pilih</option>
 
 							<?php
-							$qryDept = mysqli_query($con, "SELECT * FROM filter_dept");
-							while ($dept = mysqli_fetch_array($qryDept)) {
+							$qryDept = sqlsrv_query($con, "SELECT * FROM  db_qc.filter_dept");
+							while ($dept = sqlsrv_fetch_array($qryDept, SQLSRV_FETCH_ASSOC)) {
 								echo "<option value=\"{$dept['nama']}\">{$dept['nama']}</option>";
 							}
 							?>
@@ -600,8 +607,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<option value="">Pilih</option>
 
 							<?php
-							$qryDept = mysqli_query($con, "SELECT * FROM filter_dept");
-							while ($dept1 = mysqli_fetch_array($qryDept)) {
+							$qryDept = sqlsrv_query($con, "SELECT * FROM  db_qc.filter_dept");
+							while ($dept1 = sqlsrv_fetch_array($qryDept, SQLSRV_FETCH_ASSOC)) {
 								echo "<option value=\"{$dept1['nama']}\">{$dept1['nama']}</option>";
 							}
 							?>
@@ -624,8 +631,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<option value="">Pilih</option>
 
 							<?php
-							$qryDept = mysqli_query($con, "SELECT * FROM filter_dept");
-							while ($dept2 = mysqli_fetch_array($qryDept)) {
+							$qryDept = sqlsrv_query($con, "SELECT * FROM  db_qc.filter_dept");
+							while ($dept2 = sqlsrv_fetch_array($qryDept, SQLSRV_FETCH_ASSOC)) {
 								echo "<option value=\"{$dept2['nama']}\">{$dept2['nama']}</option>";
 							}
 							?>
@@ -649,14 +656,15 @@ $rcek = mysqli_fetch_array($sqlCek);
 								onchange="masalah_dominan_solusi(this)">
 								<option value="">Pilih</option>
 								<?php
-								$qryma = mysqli_query($con, "select
-																	group_concat(masalah_dominan) as masalah_dominan
-																from tbl_aftersales_now
-																where nodemand = '$_GET[nodemand]'
-																group by nodemand");
-								$riQryma = mysqli_fetch_array($qryma);
-								$qrym = mysqli_query($con, "SELECT masalah FROM tbl_masalah_aftersales ORDER BY masalah ASC");
-								while ($rm = mysqli_fetch_array($qrym)) {
+								$qryma = sqlsrv_query($con, "SELECT STUFF((
+																	SELECT ',' + masalah_dominan
+																	FROM  db_qc.tbl_aftersales_now
+																	WHERE nodemand = '$_GET[nodemand]'
+																	FOR XML PATH(''), TYPE
+																).value('.', 'nvarchar(max)'), 1, 1, '') AS masalah_dominan");
+								$riQryma = sqlsrv_fetch_array($qryma, SQLSRV_FETCH_ASSOC);
+								$qrym = sqlsrv_query($con, "SELECT masalah FROM  db_qc.tbl_masalah_aftersales ORDER BY masalah ASC");
+								while ($rm = sqlsrv_fetch_array($qrym, SQLSRV_FETCH_ASSOC)) {
 
 									$disabled = in_array($rm['masalah'], explode(',', $riQryma['masalah_dominan'])) ? "disabled" : '';
 									?>
@@ -674,8 +682,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<select class="form-control select2" name="solusi" id="solusi">
 								<option value="">Pilih</option>
 								<?php
-								$qrys = mysqli_query($con, "SELECT solusi FROM tbl_solusi ORDER BY solusi ASC");
-								while ($rs = mysqli_fetch_array($qrys)) {
+								$qrys = sqlsrv_query($con, "SELECT solusi FROM  db_qc.tbl_solusi ORDER BY solusi ASC");
+								while ($rs = sqlsrv_fetch_array($qrys, SQLSRV_FETCH_ASSOC)) {
 									?>
 									<option value="<?php echo $rs['solusi']; ?>" <?php if ($rcek['solusi'] == $rs['solusi']) {
 									   //echo "SELECTED";
@@ -747,10 +755,15 @@ $rcek = mysqli_fetch_array($sqlCek);
 				<label for="klasifikasi" class="col-sm-2 control-label">Klasifikasi</label>
 					<div class="col-sm-3">
 					<?php 
-                 $fil_penyebab = mysqli_query($con, "SELECT * 
-				 									FROM tbl_penyebab 
+                 $fil_penyebab = sqlsrv_query($con, "SELECT * 
+				 									FROM  db_qc.tbl_penyebab 
 													WHERE field_name = 'penyebab' ");
-                 $dklasifikasi = mysqli_fetch_all($fil_penyebab, MYSQLI_ASSOC);?>
+                 $dklasifikasi = array();
+                 if ($fil_penyebab) {
+                 	while ($row_penyebab = sqlsrv_fetch_array($fil_penyebab, SQLSRV_FETCH_ASSOC)) {
+                 		$dklasifikasi[] = $row_penyebab;
+                 	}
+                 }?>
 						<select class="form-control select2" name="klasifikasi" <?php if ($rcek['sts_red'] != "1") {
 						//echo "disabled";
 					} else {
@@ -913,8 +926,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<select class="form-control select2" name="kategori" id="kategori">
 								<option value="">Pilih</option>
 								<?php
-								$qryk = mysqli_query($con, "SELECT kategori FROM tbl_kategori_aftersales ORDER BY kategori ASC");
-								while ($rk = mysqli_fetch_array($qryk)) {
+								$qryk = sqlsrv_query($con, "SELECT kategori FROM  db_qc.tbl_kategori_aftersales ORDER BY kategori ASC");
+								while ($rk = sqlsrv_fetch_array($qryk, SQLSRV_FETCH_ASSOC)) {
 									?>
 									<option value="<?php echo $rk['kategori']; ?>" <?php if ($rcek['kategori'] == $rk['kategori']) {
 									   //echo "SELECTED";
@@ -945,127 +958,7 @@ $rcek = mysqli_fetch_array($sqlCek);
 							</span>
 						</div>
 					</div>
-					<!-- <div class="col-sm-3">
-						<div class="input-group">
-							<input name="qty_lolos" type="text" class="form-control" id="qty_lolos"
-								value="<?= ($cek > 0 && !is_null($rcek['qty_lolos']) && !empty($rcek['qty_lolos'])) ? number_format($rcek['qty_lolos'], 2) : '' ?>"
-								placeholder="0.00" style="text-align: right;" disabled>
-							<span class="input-group-addon">
-								<select name="satuan_l" style="font-size: 12px;" id="satuan1">
-									<?php
-									$units_l = ['KG']; // Define the units you want to check for
-									
-									foreach ($units_l as $unit_l) {
-										$isSelected_o = $rcek['satuan_o'] == $unit_l;
-										$selectedAttribute_o = $isSelected_o ? 'selected' : '';
-										echo "<option value=\"$unit_l\" $selectedAttribute_o>$unit_l</option>";
-									}
-									?>
-								</select>
-							</span>
-						</div>
-					</div> -->
-					<!-- <div class="col-sm-3">
-						<input type="checkbox" name="addpersonil" id="addpersonil" value="1" onClick="aktif6();" <?php if ($rcek['addpersonil'] == "1") {
-						//echo "checked";
-					} ?>>
-						<label> > 2 Personil</label>
-					</div> -->
 				</div>
-				<!-- <div class="form-group">
-					<label for="personil" class="col-sm-3 control-label">Personil 1 / Personil 2</label>
-					<div class="col-sm-4">
-						<div class="input-group">
-							<select class="form-control select2" name="personil" id="personil">
-								<option value="">Pilih</option>
-								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='personil' ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
-									?>
-									<option value="<?php echo $rp['nama']; ?>" <?php if ($rcek['personil'] == $rp['nama']) {
-									   //echo "SELECTED";
-							   	} ?>>
-										<?php echo $rp['nama']; ?>
-									</option>
-								<?php } ?>
-							</select>
-							<span class="input-group-btn"><button type="button" class="btn btn-default"
-									data-toggle="modal" data-target="#DataPersonil"> ...</button></span>
-						</div>
-					</div>
-					<div class="col-sm-4">
-						<div class="input-group">
-							<select class="form-control select2" name="personil2" id="personil2">
-								<option value="">Pilih</option>
-								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='personil' ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
-									?>
-									<option value="<?php echo $rp['nama']; ?>" <?php if ($rcek['personil2'] == $rp['nama']) {
-									   // echo "SELECTED";
-							   	} ?>>
-										<?php echo $rp['nama']; ?>
-									</option>
-								<?php } ?>
-							</select>
-							<span class="input-group-btn"><button type="button" class="btn btn-default"
-									data-toggle="modal" data-target="#DataPersonil"> ...</button></span>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="shift" class="col-sm-3 control-label">Shift / Shift2</label>
-					<div class="col-sm-3">
-						<select class="form-control select2" name="shift" id="shift">
-							<option value="">Pilih</option>
-							<option value="A" <?php if ($rcek['shift'] == "A") {
-							//echo "SELECTED";
-						} ?>>A</option>
-							<option value="B" <?php if ($rcek['shift'] == "B") {
-							//echo "SELECTED";
-						} ?>>B</option>
-							<option value="C" <?php if ($rcek['shift'] == "C") {
-							//echo "SELECTED";
-						} ?>>C</option>
-							<option value="Non-Shift" <?php if ($rcek['shift'] == "Non-Shift") {
-							//echo "SELECTED";
-						} ?>>
-								Non-Shift</option>
-							<option value="QC2" <?php if ($rcek['shift'] == "QC2") {
-							//echo "SELECTED";
-						} ?>>QC2</option>
-							<option value="Test Quality" <?php if ($rcek['shift'] == "Test Quality") {
-							//echo "SELECTED";
-						} ?>>
-								Test Quality</option>
-						</select>
-					</div>
-					<div class="col-sm-3">
-						<select class="form-control select2" name="shift2" id="shift2">
-							<option value="">Pilih</option>
-							<option value="A" <?php if ($rcek['shift2'] == "A") {
-							//echo "SELECTED";
-						} ?>>A</option>
-							<option value="B" <?php if ($rcek['shift2'] == "B") {
-							//echo "SELECTED";
-						} ?>>B</option>
-							<option value="C" <?php if ($rcek['shift2'] == "C") {
-							//echo "SELECTED";
-						} ?>>C</option>
-							<option value="Non-Shift" <?php if ($rcek['shift2'] == "Non-Shift") {
-							//echo "SELECTED";
-						} ?>>
-								Non-Shift</option>
-							<option value="QC2" <?php if ($rcek['shift2'] == "QC2") {
-							//echo "SELECTED";
-						} ?>>QC2</option>
-							<option value="Test Quality" <?php if ($rcek['shift2'] == "Test Quality") {
-							//echo "SELECTED";
-						} ?>>
-								Test Quality</option>
-						</select>
-					</div>
-				</div> -->
 				<div class="form-group" id="personil34" style="display:none;">
 					<label for="personil3" class="col-sm-3 control-label">Personil 3 / Personil 4</label>
 					<div class="col-sm-4">
@@ -1073,8 +966,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<select class="form-control select2" name="personil3" id="personil3">
 								<option value="">Pilih</option>
 								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='personil' ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
+								$qryp = sqlsrv_query($con, "SELECT nama FROM  db_qc.tbl_personil_aftersales WHERE jenis='personil' ORDER BY nama ASC");
+								while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
 									?>
 									<option value="<?php echo $rp['nama']; ?>" <?php if ($rcek['personil3'] == $rp['nama']) {
 									   //echo "SELECTED";
@@ -1092,8 +985,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<select class="form-control select2" name="personil4" id="personil4">
 								<option value="">Pilih</option>
 								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='personil' ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
+								$qryp = sqlsrv_query($con, "SELECT nama FROM  db_qc.tbl_personil_aftersales WHERE jenis='personil' ORDER BY nama ASC");
+								while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
 									?>
 									<option value="<?php echo $rp['nama']; ?>" <?php if ($rcek['personil4'] == $rp['nama']) {
 									   //echo "SELECTED";
@@ -1107,161 +1000,12 @@ $rcek = mysqli_fetch_array($sqlCek);
 						</div>
 					</div>
 				</div>
-				<!-- <div class="form-group" id="shift34" style="display:none;">
-					<label for="shift3" class="col-sm-3 control-label">Shift3 / Shift4</label>
-					<div class="col-sm-3">
-						<select class="form-control select2" name="shift3" id="shift3">
-							<option value="">Pilih</option>
-							<option value="A" <?php if ($rcek['shift3'] == "A") {
-							//echo "SELECTED";
-						} ?>>A</option>
-							<option value="B" <?php if ($rcek['shift3'] == "B") {
-							//echo "SELECTED";
-						} ?>>B</option>
-							<option value="C" <?php if ($rcek['shift3'] == "C") {
-							//echo "SELECTED";
-						} ?>>C</option>
-							<option value="Non-Shift" <?php if ($rcek['shift3'] == "Non-Shift") {
-							//echo "SELECTED";
-						} ?>>
-								Non-Shift</option>
-							<option value="QC2" <?php if ($rcek['shift3'] == "QC2") {
-							//echo "SELECTED";
-						} ?>>QC2</option>
-							<option value="Test Quality" <?php if ($rcek['shift3'] == "Test Quality") {
-							//echo "SELECTED";
-						} ?>>
-								Test Quality</option>
-						</select>
-					</div>
-					<div class="col-sm-3">
-						<select class="form-control select2" name="shift4" id="shift4">
-							<option value="">Pilih</option>
-							<option value="A" <?php if ($rcek['shift4'] == "A") {
-							//echo "SELECTED";
-						} ?>>A</option>
-							<option value="B" <?php if ($rcek['shift4'] == "B") {
-							//echo "SELECTED";
-						} ?>>B</option>
-							<option value="C" <?php if ($rcek['shift4'] == "C") {
-							//echo "SELECTED";
-						} ?>>C</option>
-							<option value="Non-Shift" <?php if ($rcek['shift4'] == "Non-Shift") {
-							//echo "SELECTED";
-						} ?>>
-								Non-Shift</option>
-							<option value="QC2" <?php if ($rcek['shift4'] == "QC2") {
-							//echo "SELECTED";
-						} ?>>QC2</option>
-							<option value="Test Quality" <?php if ($rcek['shift4'] == "Test Quality") {
-							//echo "SELECTED";
-						} ?>>
-								Test Quality</option>
-						</select>
-					</div>
-				</div> -->
-				<!-- <div class="form-group">
-					<label for="subdept" class="col-sm-3 control-label">Sub Dept / Pejabat</label>
-					<div class="col-sm-4">
-						<select class="form-control select2" name="subdept" id="subdept" onChange="aktif4();" <?php if ($rcek['sts'] != "1" or $rcek['sts_disposisiqc'] != "1") {
-						//echo "disabled";
-					} else {
-						//echo "enabled";
-					} ?>>
-							<option value="">Pilih</option>
-							<option value="ADM" <?php if ($rcek['subdept'] == "ADM") {
-							//echo "SELECTED";
-						} ?>>ADM</option>
-							<option value="AFTERSALES" <?php if ($rcek['subdept'] == "AFTERSALES") {
-							//echo "SELECTED";
-						} ?>>
-								AFTERSALES</option>
-							<option value="COLORIST" <?php if ($rcek['subdept'] == "COLORIST") {
-							//echo "SELECTED";
-						} ?>>COLORIST
-							</option>
-							<option value="INSPECTION" <?php if ($rcek['subdept'] == "INSPECTION") {
-							//echo "SELECTED";
-						} ?>>
-								INSPECTION</option>
-							<option value="KRAGH" <?php if ($rcek['subdept'] == "KRAGH") {
-							//echo "SELECTED";
-						} ?>>KRAGH
-							</option>
-							<option value="LEADER" <?php if ($rcek['subdept'] == "LEADER") {
-							//echo "SELECTED";
-						} ?>>LEADER
-							</option>
-							<option value="MANAGER/ASST.MANAGER" <?php if ($rcek['subdept'] == "MANAGER/ASST.MANAGER") {
-							//echo "SELECTED";
-						} ?>>MANAGER/ASST.MANAGER</option>
-							<option value="PACKING" <?php if ($rcek['subdept'] == "PACKING") {
-							//echo "SELECTED";
-						} ?>>PACKING
-							</option>
-							<option value="SPV" <?php if ($rcek['subdept'] == "SPV") {
-							//echo "SELECTED";
-						} ?>>SPV</option>
-							<option value="TEST QUALITY" <?php if ($rcek['subdept'] == "TEST QUALITY") {
-							//echo "SELECTED";
-						} ?>>
-								TEST QUALITY</option>
-						</select>
-					</div>
-					<div class="col-sm-4">
-						<div class="input-group">
-							<select class="form-control select2" name="pejabat" id="pejabat" <?php if ($rcek['sts_disposisiqc'] != "1") {
-							//echo "disabled";
-						} else {
-							//echo "enabled";
-						} ?>>
-								<option value="">Pilih</option>
-								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
-									?>
-									<option value="<?php echo $rp['nama']; ?>" <?php if ($rcek['personil'] == $rp['nama']) {
-									   //echo "SELECTED";
-							   	} ?>>
-										<?php echo $rp['nama']; ?>
-									</option>
-								<?php } ?>
-							</select>
-							<span class="input-group-btn"><button type="button" class="btn btn-default"
-									data-toggle="modal" data-target="#DataPejabat"> ...</button></span>
-						</div>
-					</div>
-				</div> -->
 				<div class="form-group">
 					<label for="penyebab" class="col-sm-3 control-label">Penyebab</label>
 					<div class="col-sm-6">
 						<input name="penyebab" type="text" class="form-control" id="penyebab" value="<?php if ($cek > 0) {
-						//echo $rcek['penyebab'];
-					} ?>" placeholder="Penyebab" 
-					<?php //if ($rcek['sts'] != "1" or $rcek['sts_disposisiqc'] != "1" or $rcek['sts_disposisipro'] != "1") 
-					{
-					 //echo "disabled";
-				 } //else 
-				 {
-					 //echo "enabled";
-				 } ?>>
+					} ?>" placeholder="Penyebab">
 					</div>
-					<!-- <div class="col-sm-2">
-						<select class="form-control select2" name="sts_check" <?php if ($rcek['sts'] != "1" or $rcek['sts_disposisiqc'] != "1") {
-						//echo "disabled";
-					} else {
-						//echo "enabled";
-					} ?>>
-							<option value="">Pilih</option>
-							<option value="Ceklis" <?php if ($rcek['sts_check'] == "Ceklis") {
-							//echo "SELECTED";
-						} ?>>&#10004;
-							</option>
-							<option value="Silang" <?php if ($rcek['sts_check'] == "Silang") {
-							//echo "SELECTED";
-						} ?>>X</option>
-						</select>
-					</div> -->
 				</div>
 				<div class="form-group" id="nego1">
 					<label for="nama_nego" class="col-sm-3 control-label">Nama</label>
@@ -1270,8 +1014,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 							<select class="form-control select2" name="nama_nego" id="nama_nego">
 								<option value="">Pilih</option>
 								<?php
-								$qrynm = mysqli_query($con, "SELECT nama FROM tbl_nama_nego_aftersales ORDER BY nama ASC");
-								while ($rnm = mysqli_fetch_array($qrynm)) {
+								$qrynm = sqlsrv_query($con, "SELECT nama FROM db_qc.tbl_nama_nego_aftersales ORDER BY nama ASC");
+								while ($rnm = sqlsrv_fetch_array($qrynm, SQLSRV_FETCH_ASSOC)) {
 									?>
 									<option value="<?php echo $rnm['nama']; ?>" <?php if ($rcek['nama_nego'] == $rnm['nama']) {
 									   //echo "SELECTED";
@@ -1342,8 +1086,8 @@ if ($_POST['save'] == "save") {
 	$masalah_dominan = $_POST['masalah_dominan'];
 
 	// Check if data already exists
-	$checkQuery = mysqli_query($con, "SELECT * FROM tbl_aftersales_now WHERE nodemand='$nodemand' AND nokk='$nokk' AND masalah_dominan='$masalah_dominan'");
-	if (mysqli_num_rows($checkQuery) > 0) {
+	$checkQuery = sqlsrv_query($con, "SELECT * FROM db_qc.tbl_aftersales_now WHERE nodemand='$nodemand' AND nokk='$nokk' AND masalah_dominan='$masalah_dominan'");
+	if ($checkQuery && sqlsrv_has_rows($checkQuery)) {
 		echo "<script>swal({
 			title: 'Data Sudah Ada',
 			text: 'Data dengan No Demand, No KK, dan Masalah Dominan yang sama sudah ada.',
@@ -1403,82 +1147,159 @@ if ($_POST['save'] == "save") {
 			$sts_nego = "0";
 		}
 
-		$sqlData = mysqli_query($con, "INSERT INTO tbl_aftersales_now SET 
-			klasifikasi = '$_POST[klasifikasi]',
-			leadtime_update='$_POST[leadtime_update]',
-			tanggal_leadtime_update='$_POST[tgl_leadtime_update]',
-			status_penghubung='$_POST[status_penghubung]',
-			nokk='$nokk',
-			nodemand='$nodemand',
-			langganan='$_POST[pelanggan]',
-			pelanggan='$_POST[pelanggan1]',
-			buyer='$buyer',
-			no_order='$_POST[no_order]',
-			no_hanger='$_POST[no_hanger]',
-			no_item='$_POST[no_item]',
-			po='$po',
-			jenis_kain='$jns',
-			styl='$styl',
-			lebar='$_POST[lebar]',
-			gramasi='$_POST[grms]',
-			lot='$lot',
-			warna='$warna',
-			no_warna='$nowarna',
-			masalah='$masalah',
-			masalah_dominan='$masalah_dominan',
-			qty_order='$qty_order',
-			qty_kirim='$_POST[qty_kirim]',
-			qty_claim='$_POST[qty_claim]',
-			qty_foc='$_POST[qty_foc]',
-			qty_lolos='$_POST[qty_lolos]',
-			t_jawab='$_POST[t_jawab]',
-			t_jawab1='$_POST[t_jawab1]',
-			t_jawab2='$_POST[t_jawab2]',
-			persen='$_POST[persen]',
-			persen1='$_POST[persen1]',
-			persen2='$_POST[persen2]',
-			satuan_o='$_POST[satuan_o]',
-			satuan_k='$_POST[satuan_k]',
-			satuan_c='$_POST[satuan_c]',
-			satuan_f='$_POST[satuan_f]',
-			satuan_l='$_POST[satuan_l]',
-			personil='$_POST[personil]',
-			shift='$shift',
-			shift2='$_POST[shift2]',
-			penyebab='$_POST[penyebab]',
-			subdept='$_POST[subdept]',
-			sts='$sts',
-			sts_red='$sts_red',
-			sts_claim='$sts_claim',
-			ket='$ket',
-			tgl_email='$tgl_email',
-			tgl_jawab='$tgl_jawab',
-			tgl_solusi_akhir='$_POST[tgl_solusi_akhir]',
-			leadtime_email='$_POST[leadtime_email]',
-			solusi='$_POST[solusi]',
-			sts_disposisiqc='$sts_disposisiqc',
-			sts_disposisipro='$sts_disposisipro',
-			sts_nego='$sts_nego',
-			bprc='$bprc',
-			sts_check='$_POST[sts_check]',
-			personil2='$_POST[personil2]',
-			pejabat='$_POST[pejabat]',
-			nama_nego='$_POST[nama_nego]',
-			hasil_nego='$_POST[hasil_nego]',
-			kategori='$_POST[kategori]',
-			addpersonil='$addpersonil',
-			checknego='$_POST[checknego]',
-			hod='$_POST[hod]',
-			qty_kirim2 = '$_POST[qty_kirim2]',
-			qty_claim2 = '$_POST[qty_claim2]',
-			qty_order2 = '$qty_order2',
-			qty_foc2 = '$_POST[qty_foc2]',
-			satuan_k2 = '$_POST[satuan_k2]',
-			satuan_c2 = '$_POST[satuan_c2]',
-			satuan_o2 = '$_POST[satuan_o2]',
-			satuan_f2 = '$_POST[satuan_f2]',
-			tgl_buat=now(),
-			tgl_update=now()");
+		$sqlData = sqlsrv_query($con, "INSERT INTO db_qc.tbl_aftersales_now (
+			klasifikasi,
+			leadtime_update,
+			tanggal_leadtime_update,
+			status_penghubung,
+			nokk,
+			nodemand,
+			langganan,
+			pelanggan,
+			buyer,
+			no_order,
+			no_hanger,
+			no_item,
+			po,
+			jenis_kain,
+			styl,
+			lebar,
+			gramasi,
+			lot,
+			warna,
+			no_warna,
+			masalah,
+			masalah_dominan,
+			qty_order,
+			qty_kirim,
+			qty_claim,
+			qty_foc,
+			qty_lolos,
+			t_jawab,
+			t_jawab1,
+			t_jawab2,
+			persen,
+			persen1,
+			persen2,
+			satuan_o,
+			satuan_k,
+			satuan_c,
+			satuan_f,
+			satuan_l,
+			personil,
+			shift,
+			shift2,
+			penyebab,
+			subdept,
+			sts,
+			sts_red,
+			sts_claim,
+			ket,
+			tgl_email,
+			tgl_jawab,
+			tgl_solusi_akhir,
+			leadtime_email,
+			solusi,
+			sts_disposisiqc,
+			sts_disposisipro,
+			sts_nego,
+			bprc,
+			sts_check,
+			personil2,
+			pejabat,
+			nama_nego,
+			hasil_nego,
+			kategori,
+			addpersonil,
+			checknego,
+			hod,
+			qty_kirim2,
+			qty_claim2,
+			qty_order2,
+			qty_foc2,
+			satuan_k2,
+			satuan_c2,
+			satuan_o2,
+			satuan_f2,
+			tgl_buat,
+			tgl_update
+		) VALUES (
+			'$_POST[klasifikasi]',
+			'$_POST[leadtime_update]',
+			'$_POST[tgl_leadtime_update]',
+			'$_POST[status_penghubung]',
+			'$nokk',
+			'$nodemand',
+			'$_POST[pelanggan]',
+			'$_POST[pelanggan1]',
+			'$buyer',
+			'$_POST[no_order]',
+			'$_POST[no_hanger]',
+			'$_POST[no_item]',
+			'$po',
+			'$jns',
+			'$styl',
+			'$_POST[lebar]',
+			'$_POST[grms]',
+			'$lot',
+			'$warna',
+			'$nowarna',
+			'$masalah',
+			'$masalah_dominan',
+			'$qty_order',
+			'$_POST[qty_kirim]',
+			'$_POST[qty_claim]',
+			'$_POST[qty_foc]',
+			'$_POST[qty_lolos]',
+			'$_POST[t_jawab]',
+			'$_POST[t_jawab1]',
+			'$_POST[t_jawab2]',
+			'$_POST[persen]',
+			'$_POST[persen1]',
+			'$_POST[persen2]',
+			'$_POST[satuan_o]',
+			'$_POST[satuan_k]',
+			'$_POST[satuan_c]',
+			'$_POST[satuan_f]',
+			'$_POST[satuan_l]',
+			'$_POST[personil]',
+			'$shift',
+			'$_POST[shift2]',
+			'$_POST[penyebab]',
+			'$_POST[subdept]',
+			'$sts',
+			'$sts_red',
+			'$sts_claim',
+			'$ket',
+			'$tgl_email',
+			'$tgl_jawab',
+			'$_POST[tgl_solusi_akhir]',
+			'$_POST[leadtime_email]',
+			'$_POST[solusi]',
+			'$sts_disposisiqc',
+			'$sts_disposisipro',
+			'$sts_nego',
+			'$bprc',
+			'$_POST[sts_check]',
+			'$_POST[personil2]',
+			'$_POST[pejabat]',
+			'$_POST[nama_nego]',
+			'$_POST[hasil_nego]',
+			'$_POST[kategori]',
+			'$addpersonil',
+			'$_POST[checknego]',
+			'$_POST[hod]',
+			'$_POST[qty_kirim2]',
+			'$_POST[qty_claim2]',
+			'$qty_order2',
+			'$_POST[qty_foc2]',
+			'$_POST[satuan_k2]',
+			'$_POST[satuan_c2]',
+			'$_POST[satuan_o2]',
+			'$_POST[satuan_f2]',
+			GETDATE(),
+			GETDATE()
+		)");
 
 		if ($sqlData) {
 
@@ -1706,8 +1527,8 @@ if ($_POST['save'] == "save") {
 <?php
 if ($_POST['simpan_masalah'] == "Simpan") {
 	$masalah = trim(strtoupper($_POST['masalah_dominan']));
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_masalah_aftersales SET 
-		  masalah='$masalah'");
+	$sqlData1 = sqlsrv_query($con, "INSERT INTO db_qc.tbl_masalah_aftersales (masalah)
+		  VALUES ('$masalah')");
 	if ($sqlData1) {
 		echo "<script>swal({
   title: 'Data Telah Tersimpan',   
@@ -1756,8 +1577,8 @@ if ($_POST['simpan_masalah'] == "Simpan") {
 <?php
 if ($_POST['simpan_solusi'] == "Simpan") {
 	$solusi = strtoupper($_POST['solusi']);
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_solusi SET 
-		  solusi='$solusi'");
+	$sqlData1 = sqlsrv_query($con, "INSERT INTO db_qc.tbl_solusi (solusi)
+		  VALUES ('$solusi')");
 	if ($sqlData1) {
 		echo "<script>swal({
   title: 'Data Telah Tersimpan',   
@@ -1806,9 +1627,8 @@ if ($_POST['simpan_solusi'] == "Simpan") {
 <?php
 if ($_POST['simpan_personil'] == "Simpan") {
 	$nama = strtoupper($_POST['nama']);
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_personil_aftersales SET 
-		  nama='$nama',
-		  jenis='personil'");
+	$sqlData1 = sqlsrv_query($con, "INSERT INTO db_qc.tbl_personil_aftersales (nama, jenis)
+		  VALUES ('$nama', 'personil')");
 	if ($sqlData1) {
 		echo "<script>swal({
   title: 'Data Telah Tersimpan',   
@@ -1857,9 +1677,8 @@ if ($_POST['simpan_personil'] == "Simpan") {
 <?php
 if ($_POST['simpan_pejabat'] == "Simpan") {
 	$nama = strtoupper($_POST['nama']);
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_personil_aftersales SET 
-		  nama='$nama',
-		  jenis='pejabat'");
+	$sqlData1 = sqlsrv_query($con, "INSERT INTO db_qc.tbl_personil_aftersales (nama, jenis)
+		  VALUES ('$nama', 'pejabat')");
 	if ($sqlData1) {
 		echo "<script>swal({
   title: 'Data Telah Tersimpan',   
@@ -1908,8 +1727,8 @@ if ($_POST['simpan_pejabat'] == "Simpan") {
 <?php
 if ($_POST['simpan_namanego'] == "Simpan") {
 	$nama = strtoupper($_POST['nama']);
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_nama_nego_aftersales SET 
-		  nama='$nama'");
+	$sqlData1 = sqlsrv_query($con, "INSERT INTO db_qc.tbl_nama_nego_aftersales (nama)
+		  VALUES ('$nama')");
 	if ($sqlData1) {
 		echo "<script>swal({
   title: 'Data Telah Tersimpan',   
@@ -1966,9 +1785,8 @@ if ($_POST['simpan_namanego'] == "Simpan") {
 if ($_POST['simpan_kategori'] == "Simpan") {
 	$kategori = strtoupper($_POST['kategori']);
 	$keterangan = strtoupper($_POST['keterangan']);
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_kategori_aftersales SET 
-		  kategori='$kategori',
-		  keterangan='$keterangan'");
+	$sqlData1 = sqlsrv_query($con, "INSERT INTO db_qc.tbl_kategori_aftersales (kategori, keterangan)
+		  VALUES ('$kategori', '$keterangan')");
 	if ($sqlData1) {
 		echo "<script>swal({
   title: 'Data Telah Tersimpan',   

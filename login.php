@@ -124,16 +124,18 @@ include "koneksi.php";
 <?php
 if($_POST){ //login user
   extract($_POST);
-  $username = mysqli_real_escape_string($con,$_POST['username']);
-  $password = mysqli_real_escape_string($con,$_POST['password']);
-  $sql="SELECT * FROM user_login WHERE user='$username' AND password='$password' AND ((dept = 'QC') OR (dept = 'CSR' AND level = 'AFTERSALES')) LIMIT 1";
-  $query = mysqli_query($con,$sql) or die ("error: ".mysqli_error($con));
-  $jml=mysqli_num_rows($query);
-  if($jml>0)
+  $username = isset($_POST['username']) ? $_POST['username'] : '';
+  $password = isset($_POST['password']) ? $_POST['password'] : '';
+  $sql="SELECT TOP (1) * FROM db_qc.user_login WHERE [user]=? AND [password]=? AND (([dept] = 'QC') OR ([dept] = 'CSR' AND [level] = 'AFTERSALES'))";
+  $query = sqlsrv_query($con, $sql, array($username, $password));
+  if ($query === false) {
+    die ("error: ".print_r(sqlsrv_errors(), true));
+  }
+  $r = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC);
+  if($r)
   {
     $_SESSION['usrid']=$username;
     $_SESSION['pasid']=$password;
-    $r = mysqli_fetch_array($query);
     $_SESSION['lvl_id']=$r['level'];
     $_SESSION['status']=$r['status'];
     $_SESSION['mamber']=$r['mamber'];
