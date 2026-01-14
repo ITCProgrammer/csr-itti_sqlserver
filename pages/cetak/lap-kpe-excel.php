@@ -30,7 +30,7 @@ $Kategori  = $_GET['kategori'] ?? '';
 $MasalahDominan = $_GET['masalah_dominan'] ?? '';
 
 $Where = "";
-if (!empty($Awal) && !empty($Akhir))   $Where .= " AND DATE_FORMAT(a.tgl_buat, '%Y-%m-%d') BETWEEN '$Awal' AND '$Akhir' ";
+if (!empty($Awal) && !empty($Akhir))   $Where .= " AND CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir' ";
 if (!empty($Order))                    $Where .= " AND a.no_order LIKE '%$Order%' ";
 if (!empty($PO))                       $Where .= " AND a.po LIKE '%$PO%' ";
 if (!empty($Hanger))                   $Where .= " AND a.no_hanger LIKE '%$Hanger%' ";
@@ -67,18 +67,37 @@ if (empty($Where)) {
   exit;
 }
 
-$qry1 = mysqli_query($con,"
-  SELECT a.*,
-         GROUP_CONCAT(DISTINCT b.no_ncp_gabungan SEPARATOR ', ') AS no_ncp,
-         GROUP_CONCAT(DISTINCT b.masalah_dominan  SEPARATOR ', ') AS masalah_utama,
-         GROUP_CONCAT(DISTINCT b.akar_masalah     SEPARATOR ', ') AS akar_masalah,
-         GROUP_CONCAT(DISTINCT b.solusi_panjang   SEPARATOR ', ') AS solusi_panjang
-  FROM tbl_aftersales_now a
-  LEFT JOIN tbl_ncp_qcf_now b ON a.nodemand=b.nodemand
-  WHERE 1=1 $Where $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
-  GROUP BY a.nodemand, a.masalah_dominan
-  ORDER BY a.id ASC
-");
+$qry1 = sqlsrv_query($con,
+        "WITH src AS (
+            SELECT a.*,
+                  ROW_NUMBER() OVER (PARTITION BY a.nodemand, a.masalah_dominan ORDER BY a.id ASC) AS rn
+            FROM db_qc.tbl_aftersales_now a
+            WHERE 1=1 $Where $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
+          )
+          SELECT src.*,
+                (SELECT STRING_AGG(x.no_ncp_gabungan, ', ')
+                  FROM (SELECT DISTINCT CAST(b.no_ncp_gabungan AS nvarchar(max)) AS no_ncp_gabungan
+                        FROM db_qc.tbl_ncp_qcf_now b
+                        WHERE b.nodemand = src.nodemand) x) AS no_ncp,
+                (SELECT STRING_AGG(x.masalah_dominan, ', ')
+                  FROM (SELECT DISTINCT CAST(b.masalah_dominan AS nvarchar(max)) AS masalah_dominan
+                        FROM db_qc.tbl_ncp_qcf_now b
+                        WHERE b.nodemand = src.nodemand) x) AS masalah_utama,
+                (SELECT STRING_AGG(x.akar_masalah, ', ')
+                  FROM (SELECT DISTINCT CAST(b.akar_masalah AS nvarchar(max)) AS akar_masalah
+                        FROM db_qc.tbl_ncp_qcf_now b
+                        WHERE b.nodemand = src.nodemand) x) AS akar_masalah,
+                (SELECT STRING_AGG(x.solusi_panjang, ', ')
+                  FROM (SELECT DISTINCT CAST(b.solusi_panjang AS nvarchar(max)) AS solusi_panjang
+                        FROM db_qc.tbl_ncp_qcf_now b
+                        WHERE b.nodemand = src.nodemand) x) AS solusi_panjang
+          FROM src
+          WHERE src.rn = 1
+          ORDER BY src.id ASC
+        ");
+  if ($qry1 === false) {
+    die(print_r(sqlsrv_errors(), true));
+  }
 ?>
 
 <table>
@@ -168,7 +187,7 @@ $qry1 = mysqli_query($con,"
   <tbody>
   <?php
     $no = 1;
-    while($row1 = mysqli_fetch_array($qry1)){
+    while($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
       $pelanggan = '';
       $buyer = '';
       if (!empty($row1['langganan'])) {
@@ -176,13 +195,17 @@ $qry1 = mysqli_query($con,"
         $pelanggan = $parts[0] ?? '';
         $buyer    = $parts[1] ?? '';
       }
+      $tglBuat = $row1['tgl_buat'];
+      if ($tglBuat instanceof DateTime) {
+        $tglBuat = $tglBuat->format('Y-m-d');
+      }
       // gabung T Jawab
       $tj = array_filter([$row1['t_jawab'] ?? '', $row1['t_jawab1'] ?? '', $row1['t_jawab2'] ?? ''], function($v){ return $v!==''; });
       $tjawab = implode('+', $tj);
   ?>
     <tr>
       <td class="text-center num" style="text-align: center;"><?php echo $no; ?></td>
-      <td class="text-center text" style="text-align: center;"><?php echo $row1['tgl_buat']; ?></td>
+      <td class="text-center text" style="text-align: center;"><?php echo $tglBuat; ?></td>
       <td class="wrap text" style="text-align: center;"><?php echo $pelanggan; ?></td>
       <td class="wrap text" style="text-align: center;"><?php echo $buyer; ?></td>
       <td class="text-center text" style="text-align: center;"><?php echo $row1['nodemand']; ?></td>

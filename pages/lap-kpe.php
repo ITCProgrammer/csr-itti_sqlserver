@@ -1,7 +1,7 @@
 <?PHP
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
+include "koneksi.php";
 
 ?>
 
@@ -14,21 +14,21 @@ include"koneksi.php";
 </head>
 <body>
 <?php
-$Awal	= isset($_POST['awal']) ? $_POST['awal'] : '';
-$Akhir	= isset($_POST['akhir']) ? $_POST['akhir'] : '';
-$Order	= isset($_POST['order']) ? $_POST['order'] : '';
-$Hanger	= isset($_POST['hanger']) ? $_POST['hanger'] : '';
-$PO	= isset($_POST['po']) ? $_POST['po'] : '';	
-$GShift	= isset($_POST['gshift']) ? $_POST['gshift'] : '';	
-$Fs		= isset($_POST['fasilitas']) ? $_POST['fasilitas'] : '';
-$sts_red = isset($_POST['sts_red']) ? $_POST['sts_red'] : '';
-$sts_claim = isset($_POST['sts_claim']) ? $_POST['sts_claim'] : '';
-$Langganan	= isset($_POST['langganan']) ? $_POST['langganan'] : '';
-$Demand	= isset($_POST['demand']) ? $_POST['demand'] : '';
-$Prodorder	= isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
-$Pejabat	= isset($_POST['pejabat']) ? $_POST['pejabat'] : '';
-$Solusi	= isset($_POST['solusi']) ? $_POST['solusi'] : '';
-$Kategori	= isset($_POST['kategori']) ? $_POST['kategori'] : '';
+$Awal         = isset($_POST['awal']) ? $_POST['awal'] : '';
+$Akhir        = isset($_POST['akhir']) ? $_POST['akhir'] : '';
+$Order        = isset($_POST['order']) ? $_POST['order'] : '';
+$Hanger       = isset($_POST['hanger']) ? $_POST['hanger'] : '';
+$PO           = isset($_POST['po']) ? $_POST['po'] : '';
+$GShift       = isset($_POST['gshift']) ? $_POST['gshift'] : '';
+$Fs           = isset($_POST['fasilitas']) ? $_POST['fasilitas'] : '';
+$sts_red      = isset($_POST['sts_red']) ? $_POST['sts_red'] : '';
+$sts_claim    = isset($_POST['sts_claim']) ? $_POST['sts_claim'] : '';
+$Langganan    = isset($_POST['langganan']) ? $_POST['langganan'] : '';
+$Demand       = isset($_POST['demand']) ? $_POST['demand'] : '';
+$Prodorder    = isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
+$Pejabat      = isset($_POST['pejabat']) ? $_POST['pejabat'] : '';
+$Solusi       = isset($_POST['solusi']) ? $_POST['solusi'] : '';
+$Kategori     = isset($_POST['kategori']) ? $_POST['kategori'] : '';
 $MasalahDominan = isset($_POST['masalah_dominan']) ? $_POST['masalah_dominan'] : '';
 	
 if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";}	
@@ -42,116 +42,114 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
   </div>
   <!-- /.box-header -->
   <!-- form start -->
-  <form method="post" enctype="multipart/form-data" name="form1" class="form-horizontal" id="form1">
-    <div class="box-body">
-      <div class="form-group">
-        <div class="col-sm-2">
-          <div class="input-group date">
-            <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="awal" type="text" class="form-control pull-right" id="datepicker" placeholder="Tanggal Awal" value="<?php echo $Awal; ?>" autocomplete="off"/>
-          </div>
+    <form method="post" enctype="multipart/form-data" name="form1" class="form-horizontal" id="form1">
+        <div class="box-body">
+            <div class="form-group">
+                <div class="col-sm-2">
+                    <div class="input-group date">
+                        <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
+                        <input name="awal" type="text" class="form-control pull-right" id="datepicker" placeholder="Tanggal Awal" value="<?php echo $Awal; ?>" autocomplete="off"/>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="input-group date">
+                        <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
+                        <input name="akhir" type="text" class="form-control pull-right" id="datepicker1" placeholder="Tanggal Akhir" value="<?php echo $Akhir;  ?>" autocomplete="off"/>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <input name="order" type="text" class="form-control pull-right" id="order" placeholder="No Order" value="<?php echo $Order;  ?>" />
+                </div>
+                <div class="col-sm-2">
+                    <input name="po" type="text" class="form-control pull-right" id="po" placeholder="No PO" value="<?php echo $PO;  ?>" />
+                </div>
+                <div class="col-sm-2">
+                    <input name="hanger" type="text" class="form-control pull-right" id="hanger" placeholder="No Hanger" value="<?php echo $Hanger;  ?>" />
+                </div>
+                <div class="col-sm-2">
+                    <input name="langganan" type="text" class="form-control pull-right" id="langganan" placeholder="Langganan/Buyer" value="<?php echo $Langganan;  ?>" />
+                </div>
+                <!-- /.input group -->
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2">
+                    <input name="demand" type="text" class="form-control pull-right" id="demand" placeholder="No Demand" value="<?php echo $Demand;  ?>" />
+                </div>
+                <div class="col-sm-2">
+                    <input name="prodorder" type="text" class="form-control pull-right" id="prodorder" placeholder="Prod. Order" value="<?php echo $Prodorder;  ?>" />
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control select2" name="pejabat" id="pejabat">
+                        <option value="">Pilih Pejabat</option>
+                        <?php
+                        $qryp = sqlsrv_query($con, "SELECT nama FROM db_qc.tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
+                        while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
+                        ?>
+                        <option value="<?php echo $rp['nama'];?>" <?php if($Pejabat==$rp['nama']){echo "SELECTED";}?>><?php echo $rp['nama'];?></option>
+                        <?php }?>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control select2" name="solusi" id="solusi">
+                        <option value="">Solusi</option>
+                        <?php
+                        $qryp = sqlsrv_query($con, "SELECT solusi FROM db_qc.tbl_solusi ORDER BY solusi ASC");
+                        while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
+                        ?>
+                        <option value="<?php echo $rp['solusi'];?>" <?php if($Solusi==$rp['solusi']){echo "SELECTED";}?>><?php echo $rp['solusi'];?></option>
+                        <?php }?>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control select2" name="kategori" id="kategori">
+                        <option value="">Kategori</option>
+                        <?php
+                        $categories = ["MAJOR", "SAMPLE", "REPEAT", "GENERAL"];
+                        foreach($categories as $category){
+                        ?>
+                        <option value="<?=$category?>" <?=$Kategori==$category?'selected':''?>><?=$category?></option>
+                        <?php }?>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control select2" name="masalah_dominan" id="masalah_dominan">
+                        <option value="">Pilih Masalah Dominan</option>
+                        <?php
+                        $qryMasalah = sqlsrv_query($con, "SELECT DISTINCT masalah_dominan FROM db_qc.tbl_aftersales_now ORDER BY masalah_dominan ASC");
+                        while ($rowMasalah = sqlsrv_fetch_array($qryMasalah, SQLSRV_FETCH_ASSOC)) {
+                        ?>
+                        <option value="<?php echo $rowMasalah['masalah_dominan']; ?>" <?php if ($MasalahDominan == $rowMasalah['masalah_dominan']) echo "selected"; ?>>
+                            <?php echo $rowMasalah['masalah_dominan']; ?>
+                        </option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="status_red" class="col-sm-0 control-label"></label>
+                <div class="col-sm-3">
+                    <!-- <input type="checkbox" name="sts_red" id="sts_red" value="1" >   -->
+                    <input type="checkbox" name="sts_red" id="sts_red" value="1" <?php  if($sts_red=="1" or $sts_red=="0"){ echo "checked";} ?>>
+                    <label> Laporan Leadtime Email</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="status_claim" class="col-sm-0 control-label"></label>
+                <div class="col-sm-3">
+                    <input type="checkbox" name="sts_claim" id="sts_claim" value="1" <?php  if($sts_claim=="1"){ echo "checked";} ?>>
+                    <label> Claim</label>
+                </div>
+            </div>
+            <!-- /.input group -->
         </div>
-        <div class="col-sm-2">
-          <div class="input-group date">
-            <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="akhir" type="text" class="form-control pull-right" id="datepicker1" placeholder="Tanggal Akhir" value="<?php echo $Akhir;  ?>" autocomplete="off"/>
-          </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-block btn-social btn-linkedin btn-sm" name="save" style="width: 60%">Search <i class="fa fa-search"></i></button>
+            </div>
         </div>
-        <div class="col-sm-2">
-            <input name="order" type="text" class="form-control pull-right" id="order" placeholder="No Order" value="<?php echo $Order;  ?>" />
-          </div>
-        <div class="col-sm-2">
-            <input name="po" type="text" class="form-control pull-right" id="po" placeholder="No PO" value="<?php echo $PO;  ?>" />
-          </div>
-        <div class="col-sm-2">
-            <input name="hanger" type="text" class="form-control pull-right" id="hanger" placeholder="No Hanger" value="<?php echo $Hanger;  ?>" />
-          </div>
-        <div class="col-sm-2">
-            <input name="langganan" type="text" class="form-control pull-right" id="langganan" placeholder="Langganan/Buyer" value="<?php echo $Langganan;  ?>" />
-          </div>
-        <!-- /.input group -->
-      </div>
-      <div class="form-group">
-        <div class="col-sm-2">
-          <input name="demand" type="text" class="form-control pull-right" id="demand" placeholder="No Demand" value="<?php echo $Demand;  ?>" />
-        </div>
-        <div class="col-sm-2">
-          <input name="prodorder" type="text" class="form-control pull-right" id="prodorder" placeholder="Prod. Order" value="<?php echo $Prodorder;  ?>" />
-        </div>
-        <div class="col-sm-2">
-            <select class="form-control select2" name="pejabat" id="pejabat">
-              <option value="">Pilih Pejabat</option>
-                <?php 
-                  $qryp=mysqli_query($con,"SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-                  while($rp=mysqli_fetch_array($qryp)){
-                ?>
-              <option value="<?php echo $rp['nama'];?>" <?php if($Pejabat==$rp['nama']){echo "SELECTED";}?>><?php echo $rp['nama'];?></option>	
-                <?php }?>
-            </select>
-        </div>
-        <div class="col-sm-2">
-        <select class="form-control select2" name="solusi" id="solusi">
-							<option value="">Solusi</option>
-							<?php 
-							$qryp=mysqli_query($con,"SELECT solusi FROM tbl_solusi ORDER BY solusi ASC");
-							while($rp=mysqli_fetch_array($qryp)){
-							?>
-							<option value="<?php echo $rp['solusi'];?>" <?php if($Solusi==$rp['solusi']){echo "SELECTED";}?>><?php echo $rp['solusi'];?></option>	
-							<?php }?>
-						</select>
-        </div>
-        <div class="col-sm-2">
-        <select class="form-control select2" name="kategori" id="kategori">
-							<option value="">Kategori</option>
-							<?php 
-							$categories = ["MAJOR", "SAMPLE", "REPEAT", "GENERAL"];
-							foreach($categories as $category){
-							?>
-							<option value="<?=$category?>" <?=$Kategori==$category?'selected':''?>><?=$category?></option>	
-							<?php }?>
-						</select>
-        </div>
-        <div class="col-sm-2">
-        <select class="form-control select2" name="masalah_dominan" id="masalah_dominan">
-        <option value="">Pilih Masalah Dominan</option>
-        <?php
-        $qryMasalah = mysqli_query($con, "SELECT DISTINCT masalah_dominan FROM tbl_aftersales_now ORDER BY masalah_dominan ASC");
-        while ($rowMasalah = mysqli_fetch_array($qryMasalah)) {
-        ?>
-            <option value="<?php echo $rowMasalah['masalah_dominan']; ?>" <?php if ($MasalahDominan == $rowMasalah['masalah_dominan']) echo "selected"; ?>>
-                <?php echo $rowMasalah['masalah_dominan']; ?>
-            </option>
-        <?php } ?>
-    </select>
-        </div>
-      </div>
-    <div class="form-group">
-		  <label for="status_red" class="col-sm-0 control-label"></label>		  
-        <div class="col-sm-3">
-        <!-- <input type="checkbox" name="sts_red" id="sts_red" value="1" >   -->
-        <input type="checkbox" name="sts_red" id="sts_red" value="1" <?php  if($sts_red=="1" or $sts_red=="0"){ echo "checked";} ?>>  
-        <label> Laporan Leadtime Email</label>
-          
-        </div>		  	
-		  </div>
-      <div class="form-group">
-		  <label for="status_claim" class="col-sm-0 control-label"></label>		  
-        <div class="col-sm-3">
-        <input type="checkbox" name="sts_claim" id="sts_claim" value="1" <?php  if($sts_claim=="1"){ echo "checked";} ?>>  
-        <label> Claim</label>
-          
-        </div>		  	
-		  </div>
-    <!-- /.input group -->	
-    </div>
-    <!-- /.box-body -->
-    <div class="box-footer">
-      <div class="col-sm-2">
-        <button type="submit" class="btn btn-block btn-social btn-linkedin btn-sm" name="save" style="width: 60%">Search <i class="fa fa-search"></i></button>
-      </div>
-    </div>
-    <!-- /.box-footer -->
-  </form>
+        <!-- /.box-footer -->
+    </form>
 </div>
 <div class="row">
   <div class="col-xs-12">
@@ -161,7 +159,6 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
         <?php if($_POST['awal']!="") { ?><b>Periode: <?php echo $_POST['awal']." to ".$_POST['akhir']; ?></b>
           <?php } ?>
           <div class="pull-right">
-
             <?php if($_POST['solusi'] == 'PERBAIKAN GARMENT'){ ?>
               <a href="pages/cetak/cetak_perbaikan_garment.php?awal=<?=$Awal?>&akhir=<?=$Akhir?>" class="btn btn-primary" target="_blank">Cetak Perbaikan Garment</a>
             <?php }elseif($_POST['solusi'] == 'DEBIT NOTE') {?>
@@ -169,8 +166,6 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <?php }?>
             <a href="pages/cetak/lap-kpe-excel.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>&order=<?php echo $_POST['order']; ?>&po=<?php echo $_POST['po']; ?>&hanger=<?php echo $_POST['hanger']; ?>&langganan=<?php echo $_POST['langganan']; ?>&demand=<?php echo $_POST['demand']; ?>&prodorder=<?php echo $_POST['prodorder']; ?>&pejabat=<?php echo $_POST['pejabat']; ?>" class="btn btn-success" target="_blank">Export Excel</a>
             <a href="pages/cetak/cetak_kpe.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>&order=<?php echo $_POST['order']; ?>&po=<?php echo $_POST['po']; ?>&hanger=<?php echo $_POST['hanger']; ?>&langganan=<?php echo $_POST['langganan']; ?>&demand=<?php echo $_POST['demand']; ?>&prodorder=<?php echo $_POST['prodorder']; ?>&pejabat=<?php echo $_POST['pejabat']; ?>" class="btn btn-danger <?php if($_POST['awal']=="") { echo "disabled"; }?>" target="_blank">Cetak KPE</a>
-			 
-			 
             <a href="pages/cetak/cetak_kpe_disposisi.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>&order=<?php echo $_POST['order']; ?>&po=<?php echo $_POST['po']; ?>&hanger=<?php echo $_POST['hanger']; ?>&langganan=<?php echo $_POST['langganan']; ?>&demand=<?php echo $_POST['demand']; ?>&prodorder=<?php echo $_POST['prodorder']; ?>&pejabat=<?php echo $_POST['pejabat']; ?>" class="btn btn-danger <?php if($_POST['awal']=="") { echo "disabled"; }?>" target="_blank">Cetak KPE Disposisi</a> 
             <a href="pages/cetak/excel_kpe_disposisi.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>&order=<?php echo $_POST['order']; ?>&po=<?php echo $_POST['po']; ?>&hanger=<?php echo $_POST['hanger']; ?>&langganan=<?php echo $_POST['langganan']; ?>&demand=<?php echo $_POST['demand']; ?>&prodorder=<?php echo $_POST['prodorder']; ?>&pejabat=<?php echo $_POST['pejabat']; ?>" class="btn btn-success <?php if($_POST['awal']=="") { echo "disabled"; }?>" target="_blank">Excel KPE Disposisi</a> 
           </div>
@@ -244,7 +239,7 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             $Where = "";
 
             if (!empty($Awal) && !empty($Akhir)) {
-                $Where .= " AND DATE_FORMAT(a.tgl_buat, '%Y-%m-%d') BETWEEN '$Awal' AND '$Akhir' ";
+                $Where .= " AND CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir' ";
             }
 
             if (!empty($Order)) {
@@ -292,18 +287,47 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
                 return;
             }
 
-            $qry1=mysqli_query($con,"SELECT a.*,
-                        GROUP_CONCAT( distinct b.no_ncp_gabungan separator ', ' ) as no_ncp,
-                        GROUP_CONCAT( distinct b.masalah_dominan separator ', ' ) as masalah_utama,
-                        GROUP_CONCAT( distinct b.akar_masalah separator ', ' ) as akar_masalah,
-                        GROUP_CONCAT( distinct b.solusi_panjang separator ', ' ) as solusi_panjang 
-            FROM tbl_aftersales_now a 
-            LEFT JOIN tbl_ncp_qcf_now b ON a.nodemand=b.nodemand 
-            WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where $WhereKategori $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
-            -- WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where $WhereKategori $stsred $stsclaim 
-            GROUP BY a.nodemand, a.masalah_dominan
-            ORDER BY a.id ASC");
-            while($row1=mysqli_fetch_array($qry1)){
+            $qry1 = sqlsrv_query($con,"WITH a_group AS (
+                                        SELECT
+                                            a.nodemand,
+                                            a.masalah_dominan,
+                                            MIN(a.id) AS id
+                                        FROM db_qc.tbl_aftersales_now a
+                                        WHERE a.no_order LIKE '%$Order%'
+                                            AND a.po LIKE '%$PO%'
+                                            AND a.no_hanger LIKE '%$Hanger%'
+                                            AND a.langganan LIKE '%$Langganan%'
+                                            AND a.nodemand LIKE '%$Demand%'
+                                            AND a.nokk LIKE '%$Prodorder%'
+                                            AND a.pejabat LIKE '%$Pejabat%'
+                                            AND a.solusi LIKE '%$Solusi%'
+                                            $Where $WhereKategori $stsclaim
+                                            AND (a.bprc IS NULL OR a.bprc = '')
+                                        GROUP BY a.nodemand, a.masalah_dominan
+                                    )
+                                    SELECT
+                                        a.*,
+                                        STUFF((SELECT DISTINCT ', ' + b2.no_ncp_gabungan
+                                                FROM db_qc.tbl_ncp_qcf_now b2
+                                                WHERE b2.nodemand = a.nodemand
+                                                FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS no_ncp,
+                                        STUFF((SELECT DISTINCT ', ' + b2.masalah_dominan
+                                                FROM db_qc.tbl_ncp_qcf_now b2
+                                                WHERE b2.nodemand = a.nodemand
+                                                FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS masalah_utama,
+                                        STUFF((SELECT DISTINCT ', ' + b2.akar_masalah
+                                                FROM db_qc.tbl_ncp_qcf_now b2
+                                                WHERE b2.nodemand = a.nodemand
+                                                FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS akar_masalah,
+                                        STUFF((SELECT DISTINCT ', ' + b2.solusi_panjang
+                                                FROM db_qc.tbl_ncp_qcf_now b2
+                                                WHERE b2.nodemand = a.nodemand
+                                                FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS solusi_panjang,
+                                        CONVERT(VARCHAR(19), a.tgl_buat, 120) AS tgl_buat
+                                    FROM a_group g
+                                    INNER JOIN db_qc.tbl_aftersales_now a ON a.id = g.id
+                                    ORDER BY a.id ASC;");
+            while ($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)) {
                 $noorder=str_replace("/","&",$row1['no_order']);
                 if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab']."+".$row1['t_jawab1']."+".$row1['t_jawab2'];
                 }else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
