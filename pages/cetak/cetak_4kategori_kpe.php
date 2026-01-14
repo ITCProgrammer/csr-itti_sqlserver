@@ -23,8 +23,11 @@
      $Akhir  = $_GET['akhir'];
      $Dept   = $_GET['dept'];
      $Cancel = $_GET['cancel'];
-     $qTgl   = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-     $rTgl   = mysqli_fetch_array($qTgl);
+     $qTgl   = sqlsrv_query($con, "SELECT CONVERT(varchar(10), GETDATE(), 120) as tgl_skrg, CONVERT(varchar(8), GETDATE(), 108) as jam_skrg");
+     if ($qTgl === false) {
+         die(print_r(sqlsrv_errors(), true));
+     }
+     $rTgl   = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
      if ($Awal != "") {$tgl = substr($Awal, 0, 10);
          $jam                            = $Awal;} else { $tgl = $rTgl['tgl_skrg'];
          $jam                             = $rTgl['jam_skrg'];}
@@ -230,7 +233,7 @@ border:hidden;
             $keterangan = $_GET['kategori'];
 
             if ($Awal != "" && $Akhir != "") {
-                $where_tanggal = "DATE_FORMAT(a.tgl_buat, '%Y-%m-%d') BETWEEN '$Awal' AND '$Akhir'";
+                $where_tanggal = "CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir'";
             }
             if ($Order != "") {
                 $where_no_order = "AND no_order LIKE '%$Order%'";
@@ -256,30 +259,31 @@ border:hidden;
             if ($keterangan != "") {
                 $where_keterangan = "AND KET_MASALAH LIKE '%$keterangan%'";
             }
-            $query4Kategori = mysqli_query($con, "SELECT
-														a.*,
-														sum(a.qty_claim) as qty_claim_x,
-														sum(a.qty_lolos) as qty_lolos_qc
-													FROM
-														tbl_aftersales_now a
-													WHERE
-																		$where_tanggal
-																		$where_no_order
-																		$where_po
-																		$where_hanger
-																		$where_langganan
-																		$where_demand
-																		$where_kk
-																		$where_pejabat
-                                                                        AND (a.bprc IS NULL OR a.bprc = '')
-														GROUP BY
-														a.po,
-														a.no_hanger,
-														a.warna,
-														a.masalah_dominan,
-														a.qty_order
-													ORDER BY
-														a.tgl_buat ASC");
+            $query4Kategori = sqlsrv_query($con, "WITH src AS (
+                                                    SELECT
+                                                        a.*,
+                                                        SUM(a.qty_claim) OVER (PARTITION BY a.po, a.no_hanger, a.warna, a.masalah_dominan, a.qty_order) as qty_claim_x,
+                                                        SUM(a.qty_lolos) OVER (PARTITION BY a.po, a.no_hanger, a.warna, a.masalah_dominan, a.qty_order) as qty_lolos_qc,
+                                                        ROW_NUMBER() OVER (PARTITION BY a.po, a.no_hanger, a.warna, a.masalah_dominan, a.qty_order ORDER BY a.tgl_buat ASC, a.id ASC) AS rn
+                                                    FROM
+                                                        db_qc.tbl_aftersales_now a
+                                                    WHERE
+                                                        $where_tanggal
+                                                        $where_no_order
+                                                        $where_po
+                                                        $where_hanger
+                                                        $where_langganan
+                                                        $where_demand
+                                                        $where_kk
+                                                        $where_pejabat
+                                                        AND (a.bprc IS NULL OR a.bprc = '')
+                                                )
+                                                SELECT * FROM src
+                                                WHERE rn = 1
+                                                ORDER BY tgl_buat ASC");
+            if ($query4Kategori === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }
 
             $majorTemp   = [];
             $sampleTemp  = [];
@@ -287,12 +291,18 @@ border:hidden;
             $generalTemp = [];
             $allTemp = [];
 
-            while ($row = mysqli_fetch_assoc($query4Kategori)) {
-                $query4x = mysqli_query($con, "SELECT
+            while ($row = sqlsrv_fetch_array($query4Kategori, SQLSRV_FETCH_ASSOC)) {
+                if ($row['tgl_solusi_akhir'] instanceof DateTime) {
+                    $row['tgl_solusi_akhir'] = $row['tgl_solusi_akhir']->format('Y-m-d');
+                }
+                $query4x = sqlsrv_query($con, "SELECT
 														b.pjg1
-													FROM tbl_ganti_kain_now b
+													FROM db_qc.tbl_ganti_kain_now b
 													WHERE b.id_nsp = '$row[id]' ");
-                $rowx = mysqli_fetch_assoc($query4x);
+                if ($query4x === false) {
+                    die(print_r(sqlsrv_errors(), true));
+                }
+                $rowx = sqlsrv_fetch_array($query4x, SQLSRV_FETCH_ASSOC);
 
                 $row['pjg1'] = $rowx['pjg1'];
                 $allTemp[] = $row;

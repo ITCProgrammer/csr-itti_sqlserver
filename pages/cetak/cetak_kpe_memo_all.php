@@ -23,8 +23,11 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $Dept=$_GET['dept'];
 $Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query($con,"SELECT CONVERT(varchar(10), GETDATE(), 120) as tgl_skrg, CONVERT(varchar(8), GETDATE(), 108) as jam_skrg");
+if ($qTgl === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 
 
@@ -207,12 +210,10 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
             <td><font size="-2">Tgl Update</font></td>
             <td><font size="-2">Leadtime updates</font></td>
 			<td><font size="-2">Langanan </font></td>
-			<!-- <td><font size="-2">Brand</font></td> -->
 			<td><font size="-2">Demand</font></td>
 			<td><font size="-2">LOT</font></td>
 			<td><font size="-2">PO</font></td>
 			<td><font size="-2">Hanger</font></td>
-			<!-- <td><font size="-2">Lebar & Gramasi</font></td> -->
 			<td><font size="-2">Warna</font></td>
 			<td><font size="-2">Qty Order</font></td>
 			<td><font size="-2">Qty Kirim</font></td>
@@ -221,7 +222,6 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 			<td><font size="-2">Masalah Dominan</font></td>
 			<td><font size="-2">Solusi</font></td>
 			<td><font size="-2">Qty Cutting Loss </font></td>
-			<!-- <td><font size="-2">Waktu pengerjaan </font></td> -->
 			<td><font size="-2">Incharge</font></td>
 			<td><font size="-2">Note </font></td>
 			<td><font size="-2">Status</font></td>
@@ -241,29 +241,47 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
   $Demand=$_GET['demand'];
   $Prodorder=$_GET['prodorder'];
   $Pejabat=$_GET['pejabat'];
-  if($Awal!=""){ $Where =" AND tgl_buat BETWEEN '$Awal' AND '$Akhir' "; }
+  if($Awal!=""){ $Where =" AND a.tgl_buat BETWEEN '$Awal' AND '$Akhir' "; }
   if($Awal!="" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!=""){
-		$sql_cek = "SELECT *, SUM(qty_claim) AS qty_claim_gabung FROM tbl_aftersales_now 
-		            WHERE no_order LIKE '%$Order%' 
-		            AND po LIKE '%$PO%' 
-		            AND no_hanger LIKE '%$Hanger%' 
-		            AND langganan LIKE '%$Langganan%' 
-		            AND nodemand LIKE '%$Demand%' 
-		            AND nokk LIKE '%$Prodorder%' 
-		            AND pejabat LIKE '%$Pejabat%' 
-		            $Where AND (bprc IS NULL OR bprc = '')
-		            -- GROUP BY po, no_hanger, warna, masalah_dominan, qty_order //filter ini di sesuaikan oleh permintaan user 
-		            GROUP BY nodemand, masalah_dominan 
-		            ORDER BY tgl_buat ASC";
-  $qry1=mysqli_query($con,$sql_cek);
+		$sql_cek = "WITH src AS (
+                    SELECT a.*,
+                           SUM(a.qty_claim) OVER (PARTITION BY a.nodemand, a.masalah_dominan) AS qty_claim_gabung,
+                           ROW_NUMBER() OVER (PARTITION BY a.nodemand, a.masalah_dominan ORDER BY a.tgl_buat ASC, a.id ASC) AS rn
+                    FROM db_qc.tbl_aftersales_now a
+                    WHERE a.no_order LIKE '%$Order%' 
+                    AND a.po LIKE '%$PO%' 
+                    AND a.no_hanger LIKE '%$Hanger%' 
+                    AND a.langganan LIKE '%$Langganan%' 
+                    AND a.nodemand LIKE '%$Demand%' 
+                    AND a.nokk LIKE '%$Prodorder%' 
+                    AND a.pejabat LIKE '%$Pejabat%' 
+                    $Where AND (a.bprc IS NULL OR a.bprc = '')
+                  )
+                  SELECT * FROM src
+                  WHERE rn = 1
+                  ORDER BY tgl_buat ASC";
+  $qry1=sqlsrv_query($con,$sql_cek);
+  if ($qry1 === false) {
+      die(print_r(sqlsrv_errors(), true));
+  }
 
   
   }else{
-	  $sql_cek = "SELECT *, sum(qty_claim) as qty_claim_gabung FROM tbl_aftersales_now WHERE no_order LIKE '$Order' AND po LIKE '$PO' AND no_hanger LIKE '$Hanger' AND langganan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND nokk LIKE '$Prodorder' AND pejabat LIKE '%$Pejabat%'  
-	  $Where  AND (bprc IS NULL OR bprc = '')
-	  group by po, no_hanger, warna, masalah_dominan, qty_order
-	  ORDER BY tgl_buat ASC";
-  $qry1=mysqli_query($con,$sql_cek); 
+	  $sql_cek = "WITH src AS (
+                    SELECT a.*,
+                           SUM(a.qty_claim) OVER (PARTITION BY a.po, a.no_hanger, a.warna, a.masalah_dominan, a.qty_order) AS qty_claim_gabung,
+                           ROW_NUMBER() OVER (PARTITION BY a.po, a.no_hanger, a.warna, a.masalah_dominan, a.qty_order ORDER BY a.tgl_buat ASC, a.id ASC) AS rn
+                    FROM db_qc.tbl_aftersales_now a
+                    WHERE a.no_order LIKE '$Order' AND a.po LIKE '$PO' AND a.no_hanger LIKE '$Hanger' AND a.langganan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.nokk LIKE '$Prodorder' AND a.pejabat LIKE '%$Pejabat%'  
+                    $Where  AND (a.bprc IS NULL OR a.bprc = '')
+                  )
+                  SELECT * FROM src
+                  WHERE rn = 1
+                  ORDER BY tgl_buat ASC";
+  $qry1=sqlsrv_query($con,$sql_cek);
+  if ($qry1 === false) {
+      die(print_r(sqlsrv_errors(), true));
+  }
   } ;
   
  
@@ -272,7 +290,23 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
   $total_qty_kirim = 0;
   $total_qty_claim = 0;
 
-			while($row1=mysqli_fetch_array($qry1)){
+			while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
+				$tglEmail = $row1['tgl_email'];
+				if ($tglEmail instanceof DateTime) {
+					$tglEmail = $tglEmail->format('Y-m-d');
+				}
+				$tglJawab = $row1['tgl_jawab'];
+				if ($tglJawab instanceof DateTime) {
+					$tglJawab = $tglJawab->format('Y-m-d');
+				}
+				$tglUpdate = $row1['tgl_update'];
+				if ($tglUpdate instanceof DateTime) {
+					$tglUpdate = $tglUpdate->format('Y-m-d');
+				}
+				$tglSolusiAkhir = $row1['tgl_solusi_akhir'];
+				if ($tglSolusiAkhir instanceof DateTime) {
+					$tglSolusiAkhir = $tglSolusiAkhir->format('Y-m-d');
+				}
 				if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'].", ".$row1['t_jawab2'];
 				}else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
 				$tjawab=$row1['t_jawab'].",".$row1['t_jawab1'];	
@@ -304,20 +338,18 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 		 ?>
           <tr valign="top">
             <td align="center"><font size="-2"><?php echo $no; ?></font></td>
-            <td align="center"><font size="-2"><?= $row1['tgl_email'] ?></font></td>
-            <td align="center"><font size="-2"><?= $row1['tgl_jawab']?></font></td>
+            <td align="center"><font size="-2"><?= $tglEmail ?></font></td>
+            <td align="center"><font size="-2"><?= $tglJawab ?></font></td>
             <td align="center"><font size="-2"><?= $row1['leadtime_email'] ?></font></td>
-            <td align="center"><font size="-2"><?= $row1['tgl_update'] ?></font></td>
+            <td align="center"><font size="-2"><?= $tglUpdate ?></font></td>
             <td align="center"><font size="-2"><?= $row1['leadtime_update']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['pelanggan']?> / <?php $exp = explode('/',$row1['langganan']); echo  $exp[1]  ?></font></td>
-			<!-- <td align="center"><font size="-2"><?php $exp = explode('/',$row1['langganan']); echo  $exp[1]  ?></font></td> -->
 			
 			
 			<td align="center"><font size="-2"><?=$row1['nodemand']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['lot']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['po']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['no_hanger']?></font></td>
-			<!-- <td align="center"><font size="-2"><?=$row1['lebar']?>x<?=$row1['gramasi']?></font></td> -->
 			<td align="center"><font size="-2"><?=$row1['warna']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['qty_order']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['qty_kirim']?></font></td>
@@ -351,16 +383,10 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 				
 			
 			</font></td>
-			
-			<!-- <td align="center"><font size="-2"><?php if($row1['tgl_solusi_akhir'] !='0000-00-00' and $row1['tgl_solusi_akhir'] !=null and $row1['tgl_solusi_akhir'] !='') 
-				{  ?>
-					<?=$row1['tgl_solusi_akhir'];?>
-				<?php } ?>
-			</font></td> -->
 			<td align="center"><font size="-2"><?=$row1['nama_nego']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['ket']?></font></td>
 			<td align="center">
-				<?php if($row1['tgl_solusi_akhir'] !='0000-00-00' and $row1['tgl_solusi_akhir'] !=null and $row1['tgl_solusi_akhir'] !='') 
+				<?php if($tglSolusiAkhir !='0000-00-00' and $tglSolusiAkhir !=null and $tglSolusiAkhir !='') 
 				{  ?>
 					<?php if ($excell==1){ echo 'closed';} else {?>
 						<img width=15px src="../../dist/img/check_mark.png"> 

@@ -15,21 +15,21 @@ include "koneksi.php";
 <body>
 <?php
 $default_akhir  = date("Y-m-d 23:59");
-$Awal	= isset($_POST['awal']) ? $_POST['awal'] : '2025-01-01';
-$Akhir	= isset($_POST['akhir']) ? $_POST['akhir'] : $default_akhir;
-$Order	= isset($_POST['order']) ? $_POST['order'] : '';
-$Hanger	= isset($_POST['hanger']) ? $_POST['hanger'] : '';
-$PO	= isset($_POST['po']) ? $_POST['po'] : '';	
-$GShift	= isset($_POST['gshift']) ? $_POST['gshift'] : '';	
-$Fs		= isset($_POST['fasilitas']) ? $_POST['fasilitas'] : '';
-$sts_red = isset($_POST['sts_red']) ? $_POST['sts_red'] : '';
-$lt_up = isset($_POST['lt_up']) ? $_POST['lt_up'] : '';
-$sts_claim = isset($_POST['sts_claim']) ? $_POST['sts_claim'] : '';
-$Langganan	= isset($_POST['langganan']) ? $_POST['langganan'] : '';
-$Demand	= isset($_POST['demand']) ? $_POST['demand'] : '';
-$Prodorder	= isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
-$Pejabat	= isset($_POST['pejabat']) ? $_POST['pejabat'] : '';
-$kategori	= isset($_POST['kategori']) ? $_POST['kategori'] : '';
+$Awal           = isset($_POST['awal']) ? $_POST['awal'] : '2025-01-01';
+$Akhir          = isset($_POST['akhir']) ? $_POST['akhir'] : $default_akhir;
+$Order          = isset($_POST['order']) ? $_POST['order'] : '';
+$Hanger         = isset($_POST['hanger']) ? $_POST['hanger'] : '';
+$PO             = isset($_POST['po']) ? $_POST['po'] : '';
+$GShift         = isset($_POST['gshift']) ? $_POST['gshift'] : '';
+$Fs             = isset($_POST['fasilitas']) ? $_POST['fasilitas'] : '';
+$sts_red        = isset($_POST['sts_red']) ? $_POST['sts_red'] : '';
+$lt_up          = isset($_POST['lt_up']) ? $_POST['lt_up'] : '';
+$sts_claim      = isset($_POST['sts_claim']) ? $_POST['sts_claim'] : '';
+$Langganan      = isset($_POST['langganan']) ? $_POST['langganan'] : '';
+$Demand         = isset($_POST['demand']) ? $_POST['demand'] : '';
+$Prodorder      = isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
+$Pejabat        = isset($_POST['pejabat']) ? $_POST['pejabat'] : '';
+$kategori       = isset($_POST['kategori']) ? $_POST['kategori'] : '';
 	
 if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";}	
 ?>
@@ -82,8 +82,8 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <select class="form-control select2" name="pejabat" id="pejabat">
               <option value="">Pilih Pejabat</option>
                 <?php 
-                  $qryp=mysqli_query($con,"SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-                  while($rp=mysqli_fetch_array($qryp)){
+                  $qryp=sqlsrv_query($con,"SELECT nama FROM db_qc.tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
+                  while($rp=sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)){
                 ?>
               <option value="<?php echo $rp['nama'];?>" <?php if($Pejabat==$rp['nama']){echo "SELECTED";}?>><?php echo $rp['nama'];?></option>	
                 <?php }?>
@@ -93,8 +93,8 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <select class="form-control select2" name="kategori" id="kategori">
               <option value="">Pilih Kategori 4 KPE</option>
                 <?php 
-                  $qryp=mysqli_query($con,"SELECT kategori FROM tbl_kategori_kpe ORDER BY id ASC");
-                  while($rp=mysqli_fetch_array($qryp)){
+                  $qryp=sqlsrv_query($con,"SELECT kategori FROM db_qc.tbl_kategori_kpe ORDER BY id ASC");
+                  while($rp=sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)){
                 ?>
               <option value="<?php echo $rp['kategori'];?>" <?php if($kategori==$rp['kategori']){echo "SELECTED";}?>><?php echo $rp['kategori'];?></option>	
                 <?php }?>
@@ -201,41 +201,84 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             if($sts_claim=="1"){ $stsclaim =" AND a.sts_claim='1' "; }else{$stsclaim =" ";}
             if($Awal!=""){ $Where =" AND a.tgl_email BETWEEN '$Awal' AND '$Akhir' "; }
             if($Awal!="" or $sts_red=="1" or $sts_claim=="1" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!=""){
-              $sql = "SELECT a.*, 
-              GROUP_CONCAT(DISTINCT b.no_ncp SEPARATOR ', ') AS no_ncp, 
-              GROUP_CONCAT(DISTINCT b.masalah SEPARATOR ', ') AS masalah_ncp 
-              FROM tbl_aftersales_now a 
-              LEFT JOIN tbl_ncp_qcf_new b ON a.nodemand = b.nodemand 
-              WHERE 
-                (a.solusi = '' 
-                 OR a.tgl_solusi_akhir ='' 
-                 OR a.tgl_solusi_akhir ='0000-00-00')
-              AND a.no_order LIKE '%$Order%' 
-              AND a.po LIKE '%$PO%' 
-              AND a.no_hanger LIKE '%$Hanger%' 
-              AND a.langganan LIKE '%$Langganan%' 
-              AND a.nodemand LIKE '%$Demand%' 
-              AND a.nokk LIKE '%$Prodorder%' 
-              AND a.pejabat LIKE '%$Pejabat%' 
-              $Where $stsred $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
-              GROUP BY a.nodemand, a.masalah_dominan 
-              ORDER BY a.tgl_email ASC";
-              $qry1=mysqli_query($con,$sql);
+              $sql = "WITH src AS (
+                SELECT a.*,
+                       ROW_NUMBER() OVER (PARTITION BY a.nodemand, a.masalah_dominan ORDER BY a.id ASC) AS rn
+                FROM db_qc.tbl_aftersales_now a
+                WHERE
+                  (a.solusi = ''
+                   OR CAST(a.tgl_solusi_akhir AS varchar(20)) = ''
+                   OR CAST(a.tgl_solusi_akhir AS varchar(20)) = '0000-00-00')
+                AND a.no_order LIKE '%$Order%'
+                AND a.po LIKE '%$PO%'
+                AND a.no_hanger LIKE '%$Hanger%'
+                AND a.langganan LIKE '%$Langganan%'
+                AND a.nodemand LIKE '%$Demand%'
+                AND a.nokk LIKE '%$Prodorder%'
+                AND a.pejabat LIKE '%$Pejabat%'
+                $Where $stsred $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
+              )
+              SELECT src.*,
+                     (SELECT STRING_AGG(x.no_ncp, ', ')
+                      FROM (SELECT DISTINCT CAST(b.no_ncp AS nvarchar(max)) AS no_ncp
+                            FROM db_qc.tbl_ncp_qcf_new b
+                            WHERE b.nodemand = src.nodemand) x) AS no_ncp,
+                     (SELECT STRING_AGG(x.masalah, ', ')
+                      FROM (SELECT DISTINCT CAST(b.masalah AS nvarchar(max)) AS masalah
+                            FROM db_qc.tbl_ncp_qcf_new b
+                            WHERE b.nodemand = src.nodemand) x) AS masalah_ncp
+              FROM src
+              WHERE src.rn = 1
+              ORDER BY src.tgl_email ASC";
+              $qry1=sqlsrv_query($con,$sql);
+              if ($qry1 === false) {
+                die(print_r(sqlsrv_errors(), true));
+              }
                   }else{
-              $sql = "SELECT a.*,
-                    GROUP_CONCAT( DISTINCT b.no_ncp SEPARATOR ', ' ) AS no_ncp,
-                    GROUP_CONCAT( DISTINCT b.masalah SEPARATOR ', ' ) AS masalah_ncp 
-                    FROM tbl_aftersales_now a LEFT JOIN tbl_ncp_qcf_new b ON a.nodemand=b.nodemand 
-                    WHERE a.solusi = '' and a.no_order LIKE '$Order' AND a.po LIKE '$PO' AND a.no_hanger LIKE '$Hanger' AND a.langganan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.nokk LIKE '$Prodorder' AND a.pejabat LIKE '$Pejabat' $Where $stsred $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
-                    GROUP BY a.nodemand
-                    ORDER BY a.tgl_email ASC";
-                    $qry1=mysqli_query($con,$sql);
+              $sql = "WITH src AS (
+                SELECT a.*,
+                       ROW_NUMBER() OVER (PARTITION BY a.nodemand ORDER BY a.id ASC) AS rn
+                FROM db_qc.tbl_aftersales_now a
+                WHERE a.solusi = '' and a.no_order LIKE '$Order' AND a.po LIKE '$PO' AND a.no_hanger LIKE '$Hanger' AND a.langganan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.nokk LIKE '$Prodorder' AND a.pejabat LIKE '$Pejabat' $Where $stsred $stsclaim AND (a.bprc IS NULL OR a.bprc = '')
+              )
+              SELECT src.*,
+                     (SELECT STRING_AGG(x.no_ncp, ', ')
+                      FROM (SELECT DISTINCT CAST(b.no_ncp AS nvarchar(max)) AS no_ncp
+                            FROM db_qc.tbl_ncp_qcf_new b
+                            WHERE b.nodemand = src.nodemand) x) AS no_ncp,
+                     (SELECT STRING_AGG(x.masalah, ', ')
+                      FROM (SELECT DISTINCT CAST(b.masalah AS nvarchar(max)) AS masalah
+                            FROM db_qc.tbl_ncp_qcf_new b
+                            WHERE b.nodemand = src.nodemand) x) AS masalah_ncp
+              FROM src
+              WHERE src.rn = 1
+              ORDER BY src.tgl_email ASC";
+                    $qry1=sqlsrv_query($con,$sql);
+                    if ($qry1 === false) {
+                      die(print_r(sqlsrv_errors(), true));
+                    }
             }
 
 			 
 			
 		
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
+                  $tglEmail = $row1['tgl_email'];
+                  if ($tglEmail instanceof DateTime) {
+                    $tglEmail = $tglEmail->format('Y-m-d');
+                  }
+                  $tglJawab = $row1['tgl_jawab'];
+                  if ($tglJawab instanceof DateTime) {
+                    $tglJawab = $tglJawab->format('Y-m-d');
+                  }
+                  $tglSolusiAkhir = $row1['tgl_solusi_akhir'];
+                  if ($tglSolusiAkhir instanceof DateTime) {
+                    $tglSolusiAkhir = $tglSolusiAkhir->format('Y-m-d');
+                  }
+                  $hod = $row1['hod'];
+                  if ($hod instanceof DateTime) {
+                    $hod = $hod->format('Y-m-d');
+                  }
                   $noorder=str_replace("/","&",$row1['no_order']);
                   if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab']."+".$row1['t_jawab1']."+".$row1['t_jawab2'];
                   }else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
@@ -261,12 +304,12 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
            <a  href="EditKPENew-<?php echo $row1['id']; ?>-1" class="btn btn-info btn-xs <?php if($_SESSION['akses']=='biasa' OR $_SESSION['lvl_id']!='AFTERSALES'){ echo "disabled"; } ?>" target="_blank"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
             </div></td>
 			<td><?=$row1['nama_nego']?></td>
-			<td align=center><?php if($row1['tgl_email']=='0000-00-00') {echo '-';} else { echo $row1['tgl_email']; }?></td>
+			<td align=center><?php if($tglEmail=='0000-00-00') {echo '-';} else { echo $tglEmail; }?></td>
 			<td>
-				<?php if($row1['tgl_jawab']=='0000-00-00') {echo '-';} else { echo $row1['tgl_jawab']; }?>
+				<?php if($tglJawab=='0000-00-00') {echo '-';} else { echo $tglJawab; }?>
 			</td>
-			<td align=center><?php if($row1['tgl_solusi_akhir']=='0000-00-00' or $row1['tgl_solusi_akhir'] == null ) {echo '-';} else { echo $row1['tgl_solusi_akhir']; }?></td>	
-			<td align=center><?php if($row1['hod']=='0000-00-00' or $row1['hod'] == null ) {echo '-';} else { echo $row1['hod']; }?></td>	
+			<td align=center><?php if($tglSolusiAkhir=='0000-00-00' or $tglSolusiAkhir == null ) {echo '-';} else { echo $tglSolusiAkhir; }?></td>	
+			<td align=center><?php if($hod=='0000-00-00' or $hod == null ) {echo '-';} else { echo $hod; }?></td>	
 			<td><?=$row1['langganan']?></td>
 			<td><?=$row1['nodemand']?></td>
 			<td><?=$row1['lot']?></td>

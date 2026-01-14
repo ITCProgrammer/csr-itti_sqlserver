@@ -17,8 +17,11 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $Dept=$_GET['dept'];
 $Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query($con,"SELECT CONVERT(varchar(10), GETDATE(), 120) as tgl_skrg, CONVERT(varchar(8), GETDATE(), 108) as jam_skrg");
+if ($qTgl === false) {
+  die(print_r(sqlsrv_errors(), true));
+}
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <?php if (!isset($_GET['excel'])) { ?>
@@ -163,19 +166,41 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
   $Demand=$_GET['demand'];
   $Prodorder=$_GET['prodorder'];
   $Pejabat=$_GET['pejabat'];
-  if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+  if($Awal!=""){ $Where =" AND CONVERT(date, tgl_buat) BETWEEN '$Awal' AND '$Akhir' "; }
   if($Awal!="" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!=""){
-  $sql_cek = "SELECT * FROM tbl_aftersales_now WHERE ( solusi is null or solusi = '' OR tgl_solusi_akhir is null OR tgl_solusi_akhir = '' OR tgl_solusi_akhir = '0000-00-00' ) and  no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_hanger LIKE '%$Hanger%' AND langganan LIKE '%$Langganan%' AND nodemand LIKE '%$Demand%' AND nokk LIKE '%$Prodorder%' AND pejabat LIKE '%$Pejabat%' $Where AND (bprc IS NULL OR bprc = '') ORDER BY tgl_email ASC";
-  $qry1=mysqli_query($con,$sql_cek);
+  $sql_cek = "SELECT * FROM db_qc.tbl_aftersales_now WHERE ( solusi is null or solusi = '' OR tgl_solusi_akhir is null OR CAST(tgl_solusi_akhir AS varchar(20)) = '' OR CAST(tgl_solusi_akhir AS varchar(20)) = '0000-00-00' ) and  no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_hanger LIKE '%$Hanger%' AND langganan LIKE '%$Langganan%' AND nodemand LIKE '%$Demand%' AND nokk LIKE '%$Prodorder%' AND pejabat LIKE '%$Pejabat%' $Where AND (bprc IS NULL OR bprc = '') ORDER BY tgl_email ASC";
+  $qry1=sqlsrv_query($con,$sql_cek);
+  if ($qry1 === false) {
+    die(print_r(sqlsrv_errors(), true));
+  }
 }else{
-  $sql_cek = "SELECT * FROM tbl_aftersales_now WHERE ( solusi is null or solusi = '' OR tgl_solusi_akhir is null OR tgl_solusi_akhir = '' OR tgl_solusi_akhir = '0000-00-00' ) and  no_order LIKE '$Order' AND po LIKE '$PO' AND no_hanger LIKE '$Hanger' AND langganan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND nokk LIKE '$Prodorder' AND pejabat LIKE '%$Pejabat%' $Where AND (bprc IS NULL OR bprc = '') ORDER BY tgl_email ASC";
-  $qry1=mysqli_query($con,$sql_cek);
+  $sql_cek = "SELECT * FROM db_qc.tbl_aftersales_now WHERE ( solusi is null or solusi = '' OR tgl_solusi_akhir is null OR CAST(tgl_solusi_akhir AS varchar(20)) = '' OR CAST(tgl_solusi_akhir AS varchar(20)) = '0000-00-00' ) and  no_order LIKE '$Order' AND po LIKE '$PO' AND no_hanger LIKE '$Hanger' AND langganan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND nokk LIKE '$Prodorder' AND pejabat LIKE '%$Pejabat%' $Where AND (bprc IS NULL OR bprc = '') ORDER BY tgl_email ASC";
+  $qry1=sqlsrv_query($con,$sql_cek);
+  if ($qry1 === false) {
+    die(print_r(sqlsrv_errors(), true));
+  }
 } ;
   $total_qty_order = 0;
   $total_qty_kirim = 0;
   $total_qty_claim = 0;   
   
-			while($row1=mysqli_fetch_array($qry1)){
+			while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
+        $tglEmail = $row1['tgl_email'];
+        if ($tglEmail instanceof DateTime) {
+          $tglEmail = $tglEmail->format('Y-m-d');
+        }
+        $tglJawab = $row1['tgl_jawab'];
+        if ($tglJawab instanceof DateTime) {
+          $tglJawab = $tglJawab->format('Y-m-d');
+        }
+        $tglLeadtimeUpdate = $row1['tanggal_leadtime_update'];
+        if ($tglLeadtimeUpdate instanceof DateTime) {
+          $tglLeadtimeUpdate = $tglLeadtimeUpdate->format('Y-m-d');
+        }
+        $hod = $row1['hod'];
+        if ($hod instanceof DateTime) {
+          $hod = $hod->format('Y-m-d');
+        }
 				if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'].", ".$row1['t_jawab2'];
 				}else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
 				$tjawab=$row1['t_jawab'].",".$row1['t_jawab1'];	
@@ -200,40 +225,10 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
     <tr valign="top">
       <td align="center"><font size="-2"><?php echo $no; ?></font></td>
       <td align="center"><font size="-2"><?=$row1['nama_nego']?></font></td>
-			<td align="center"><font size="-2"><?php if($row1['tgl_email']=='0000-00-00') 
-                                                  {
-                                                    echo '-';
-                                                  } 
-                                                else 
-                                                  { 
-                                                    echo $row1['tgl_email']; 
-                                                  }
-                                                  ?></font></td>
-			<td align="center"><font size="-2"><?php if($row1['tgl_jawab']=='0000-00-00') 
-                                                  {
-                                                    echo '-';
-                                                  } 
-                                                else 
-                                                  { 
-                                                    echo $row1['tgl_jawab']; 
-                                                  }
-                                                  ?></font></td>
-			<td align="center"><font size="-2"><?php if(!empty($row1['tanggal_leadtime_update']) && $row1['tanggal_leadtime_update']=='0000-00-00'){
-                                                    echo '-';
-                                                  }
-                                                else{ 
-                                                    echo $row1['tanggal_leadtime_update']; 
-                                                  }
-                                                  ?></font></td>
-			<td align="center"><font size="-2"><?php if($row1['hod']=='0000-00-00' or $row1['hod'] == null ) 
-                                                  {
-                                                    echo '-';
-                                                  } 
-                                                else 
-                                                  { 
-                                                    echo $row1['hod']; 
-                                                  }
-                                                  ?></font></td>
+			<td align="center"><font size="-2"><?php if($tglEmail=='0000-00-00') {  echo '-';} else {echo $tglEmail;}  ?></font></td>
+			<td align="center"><font size="-2"><?php if($tglJawab=='0000-00-00') {  echo '-';} else {echo $tglJawab;}?></font></td>
+			<td align="center"><font size="-2"><?php if(!empty($tglLeadtimeUpdate) && $tglLeadtimeUpdate=='0000-00-00'){echo '-';}else{ echo $tglLeadtimeUpdate; }?></font></td>
+			<td align="center"><font size="-2"><?php if($hod=='0000-00-00' or $hod == null ) {  echo '-';} else{echo $hod;}?></font></td>
 			<td align="left"><font size="-2"><?=$row1['langganan']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['nodemand']?></font></td>
 			<td align="center"><font size="-2"><?=$row1['lot']?></font></td>
