@@ -3,26 +3,30 @@
 // Gunakan parameter awal dari GET untuk nama file agar tidak undefined
 $awalParam = isset($_GET['awal']) ? $_GET['awal'] : date('Y-m-d');
 $fnameDate  = date('Ymd', strtotime($awalParam));
-header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
-header("Content-Disposition: attachment; filename=Rekap-Data-{$fnameDate}.xls");
-header("Pragma: no-cache");
-header("Expires: 0");
+// header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+// header("Content-Disposition: attachment; filename=Rekap-Data-{$fnameDate}.xls");
+// header("Pragma: no-cache");
+// header("Expires: 0");
 echo "\xEF\xBB\xBF"; // UTF-8 BOM
 
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
 
-    $Awal       = isset($_GET['awal']) ? mysqli_real_escape_string($con, $_GET['awal']) : '';
-    $Akhir      = isset($_GET['akhir']) ? mysqli_real_escape_string($con, $_GET['akhir']) : '';
-    $Order      = isset($_GET['no_order']) ? mysqli_real_escape_string($con, $_GET['no_order']) : '';
-    $PO         = isset($_GET['no_po']) ? mysqli_real_escape_string($con, $_GET['no_po']) : '';
-    $Item       = isset($_GET['item']) ? mysqli_real_escape_string($con, $_GET['item']) : '';
-    $Warna      = isset($_GET['warna']) ? mysqli_real_escape_string($con, $_GET['warna']) : '';
-    $Langganan  = isset($_GET['langganan']) ? mysqli_real_escape_string($con, $_GET['langganan']) : '';
-    $Delay      = isset($_GET['delay']) ? mysqli_real_escape_string($con, $_GET['delay']) : '';
-    $Demand     = isset($_GET['demand']) ? mysqli_real_escape_string($con, $_GET['demand']) : '';
-    $Prodorder  = isset($_GET['prodorder']) ? mysqli_real_escape_string($con, $_GET['prodorder']) : '';
+function sqlsrv_escape_string($value) {
+    return str_replace("'", "''", $value);
+}
+
+    $Awal       = isset($_GET['awal']) ? sqlsrv_escape_string($_GET['awal']) : '';
+    $Akhir      = isset($_GET['akhir']) ? sqlsrv_escape_string($_GET['akhir']) : '';
+    $Order      = isset($_GET['no_order']) ? sqlsrv_escape_string($_GET['no_order']) : '';
+    $PO         = isset($_GET['no_po']) ? sqlsrv_escape_string($_GET['no_po']) : '';
+    $Item       = isset($_GET['item']) ? sqlsrv_escape_string($_GET['item']) : '';
+    $Warna      = isset($_GET['warna']) ? sqlsrv_escape_string($_GET['warna']) : '';
+    $Langganan  = isset($_GET['langganan']) ? sqlsrv_escape_string($_GET['langganan']) : '';
+    $Delay      = isset($_GET['delay']) ? sqlsrv_escape_string($_GET['delay']) : '';
+    $Demand     = isset($_GET['demand']) ? sqlsrv_escape_string($_GET['demand']) : '';
+    $Prodorder  = isset($_GET['prodorder']) ? sqlsrv_escape_string($_GET['prodorder']) : '';
 ?>
 <?php 
 	function qty_order($nodemand) {
@@ -472,7 +476,7 @@ include "../../koneksi.php";
         <?php
         function get_nodemand($sql) {
             $nodemand = array();
-            while($r=mysqli_fetch_array($sql)){
+            while($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
                 $nodemand[]  =$r['nodemand'];
             }
             return $nodemand;
@@ -482,28 +486,48 @@ include "../../koneksi.php";
         // Initialize filters to avoid undefined notices
         $Where = '';
         $Dly   = '';
-        if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-        if($Delay=="1"){ $Dly =" AND DATEDIFF(a.tgl_pack, a.tglcwarna)>=3 AND a.sts_nodelay='0'"; }
+        if($Awal!=""){ $Where =" AND CONVERT(date, a.tgl_masuk) BETWEEN '$Awal' AND '$Akhir' "; }
+        if($Delay=="1"){ $Dly =" AND DATEDIFF(day, a.tglcwarna, a.tgl_pack)>=3 AND a.sts_nodelay='0'"; }
         if($Awal!="" or $Delay=="1" or $Order!="" or $Warna!="" or $Item!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!=""){
-            $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM tbl_qcf a
-            left join tbl_qcf_qty_order b on (a.id = b.id)
+            $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM db_qc.tbl_qcf a
+            left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
             WHERE a.no_order LIKE '$Order%' AND a.no_po LIKE '$PO%' AND a.no_hanger LIKE '$Item%' AND a.warna LIKE '$Warna%' AND a.pelanggan LIKE '$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.lot LIKE '%$Prodorder%' $Where $Dly";
-            $sql=mysqli_query($con,$code);
+            $sql=sqlsrv_query($con,$code);
+            if ($sql === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }
         }else{
-            $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM tbl_qcf a 
-            left join tbl_qcf_qty_order b on (a.id = b.id)
+            $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM db_qc.tbl_qcf a 
+            left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
             WHERE a.no_order LIKE '$Order' AND a.no_po LIKE '$PO' AND a.no_hanger LIKE '$Item' AND a.warna LIKE '$Warna' AND a.pelanggan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.lot LIKE '$Prodorder' $Where $Dly";
-            $sql=mysqli_query($con,$code);
+            $sql=sqlsrv_query($con,$code);
+            if ($sql === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }
         }
         $col=0;
         
-        while($r=mysqli_fetch_array($sql)){
-            if($r['tglcwarna']==NULL){
-                $tgl_warna= new DateTime($r['tgl_pack']);
-            }else{
-                $tgl_warna= new DateTime($r['tglcwarna']);
+        
+        while($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
+            $tglMasuk = $r['tgl_masuk'];
+            if ($tglMasuk instanceof DateTime) {
+                $tglMasuk = $tglMasuk->format('Y-m-d');
             }
-            $tgl_pack= new DateTime($r['tgl_pack']);
+            $tglPackVal = $r['tgl_pack'];
+            $tglPackObj = ($tglPackVal instanceof DateTime) ? $tglPackVal : new DateTime($tglPackVal);
+            $tglCwarnaVal = $r['tglcwarna'];
+            $tglCwarnaObj = null;
+            if ($tglCwarnaVal instanceof DateTime) {
+                $tglCwarnaObj = $tglCwarnaVal;
+            } elseif ($tglCwarnaVal !== null && $tglCwarnaVal !== '') {
+                $tglCwarnaObj = new DateTime($tglCwarnaVal);
+            }
+            if($tglCwarnaObj==NULL){
+                $tgl_warna= $tglPackObj;
+            }else{
+                $tgl_warna= $tglCwarnaObj;
+            }
+            $tgl_pack= $tglPackObj;
             $delay = $tgl_pack->diff($tgl_warna);
             
             // Style untuk baris
@@ -546,7 +570,7 @@ include "../../koneksi.php";
             <td style="<?= $centerStyle ?>"><?= $r['lot'] ?></td>
             <td style="<?= $centerStyle ?>"><?= $r['lebar'] ?></td>
             <td style="<?= $centerStyle ?>"><?= $r['gramasi'] ?></td>
-            <td style="<?= $centerStyle ?>"><?= $r['tgl_masuk'] ?></td>
+            <td style="<?= $centerStyle ?>"><?= $tglMasuk ?></td>
             <td style="<?= $rightStyle ?>"><?= $r['rol'] ?></td>
             <td style="<?= $rightStyle ?>"><?= $r['netto'] ?></td>
             <td style="<?= $centerStyle ?>"><?= $r['panjang']." ".$r['satuan'] ?></td>

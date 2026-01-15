@@ -3,9 +3,33 @@ ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
     $modal_id=$_GET['id'];
-    $qryData=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE id='$modal_id'");
-    $rData=mysqli_fetch_array($qryData);
-
+    $qryData=sqlsrv_query($con,"SELECT * FROM db_qc.tbl_qcf WHERE id='$modal_id'");
+    $rData=sqlsrv_fetch_array($qryData, SQLSRV_FETCH_ASSOC);
+    $tgl_fin = $rData['tgl_masuk'];
+    if ($tgl_fin instanceof DateTime) {
+      $tgl_fin = $tgl_fin->format('Y-m-d');
+    }
+    $tgl_ins = $rData['tgl_ins'];
+    if ($tgl_ins instanceof DateTime) {
+      $tgl_ins = $tgl_ins->format('Y-m-d');
+    }
+    $tgl_pack = $rData['tgl_pack'];
+    if ($tgl_pack instanceof DateTime) {
+      $tgl_pack = $tgl_pack->format('Y-m-d');
+    }
+    $tgl_masuk = $rData['tgl_masuk'];
+    if ($tgl_masuk instanceof DateTime) {
+      $tgl_masuk = $tgl_masuk->format('Y-m-d');
+    }
+    function format_decimal_2($value) {
+      if ($value === null || $value === '') {
+        return '0.00';
+      }
+      if (is_numeric($value)) {
+        return number_format((float)$value, 2, '.', '');
+      }
+      return $value;
+    }
 ?>
 <div class="modal-dialog">
   <div class="modal-content">
@@ -26,7 +50,7 @@ include("../koneksi.php");
           <label for="netto" class="col-sm-3 control-label">Netto</label>
           <div class="col-sm-3">
             <div class="input-group">
-              <input name="netto" type="text" class="form-control" id="netto" value="<?php echo $rData['netto'];?>" placeholder="0.00" required style="text-align: right;"><span class="input-group-addon">KG</span></div>
+              <input name="netto" type="text" class="form-control" id="netto" value="<?php echo format_decimal_2($rData['netto']);?>" placeholder="0.00" required style="text-align: right;"><span class="input-group-addon">KG</span></div>
           </div>
         </div>
         <div class="form-group">
@@ -47,7 +71,7 @@ include("../koneksi.php");
           <label for="sisa" class="col-sm-3 control-label">Sisa</label>
           <div class="col-sm-3">
             <div class="input-group">
-            <input name="sisa" type="text" class="form-control" id="sisa" value="<?php echo $rData['sisa'];?>" placeholder="0.00" required style="text-align: right;"><span class="input-group-addon">KG</span>
+            <input name="sisa" type="text" class="form-control" id="sisa" value="<?php echo format_decimal_2($rData['sisa']);?>" placeholder="0.00" required style="text-align: right;"><span class="input-group-addon">KG</span>
            </div>
           </div>
         </div>
@@ -56,13 +80,13 @@ include("../koneksi.php");
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_fin" type="text" class="form-control pull-right" id="datepicker3" placeholder="0000-00-00" value="<?php echo $rData['tgl_fin'];?>" />
+              <input name="tgl_fin" type="text" class="form-control pull-right" id="datepicker3" placeholder="0000-00-00" value="<?php echo $tgl_fin;?>" />
             </div>
           </div>
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_inspek" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php echo $rData['tgl_ins'];?>" />
+              <input name="tgl_inspek" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php echo $tgl_ins;?>" />
             </div>
           </div>
         </div>
@@ -75,13 +99,13 @@ include("../koneksi.php");
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_packing" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $rData['tgl_pack'];?>" />
+              <input name="tgl_packing" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $tgl_pack;?>" />
             </div>
           </div>
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_masuk" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo $rData['tgl_masuk'];?>" />
+              <input name="tgl_masuk" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo $tgl_masuk;?>" />
             </div>
           </div>
         </div>

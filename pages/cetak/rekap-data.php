@@ -3,6 +3,9 @@ ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
 require_once('dompdf/dompdf_config.inc.php');
+function sqlsrv_escape_string($value) {
+  return str_replace("'", "''", $value);
+}
 //--
 $idkk=$_REQUEST['idkk'];
 $act=$_GET['g'];
@@ -85,8 +88,32 @@ border:hidden;
   <tbody>';
 	$no=1; $tyard=0;$tmeter=0;$tpcs=0;$kgmeter=0;$kgyard=0;$kgpcs=0;$smeter=0;$syard=0;$spcs=0;$tnetto=0;$snetto=0;
 	$brtmeter=0;$brtyard=0;$brtpcs=0;$xmeter=0;$xyard=0;$xpcs=0;$xnetto=0;
-  	$sql=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE no_order LIKE '$_GET[order]%' AND no_po LIKE '$_GET[po]%' AND no_hanger LIKE '$_GET[item]%' AND warna LIKE '$_GET[warna]%' AND pelanggan LIKE '$_GET[buyer]%' ");
-	while($r=mysqli_fetch_array($sql)){
+    $Order = isset($_GET['order']) ? sqlsrv_escape_string($_GET['order']) : '';
+    $PO = isset($_GET['po']) ? sqlsrv_escape_string($_GET['po']) : '';
+    $Item = isset($_GET['item']) ? sqlsrv_escape_string($_GET['item']) : '';
+    $Warna = isset($_GET['warna']) ? sqlsrv_escape_string($_GET['warna']) : '';
+    $Buyer = isset($_GET['buyer']) ? sqlsrv_escape_string($_GET['buyer']) : '';
+  	$sql=sqlsrv_query($con,"SELECT * FROM db_qc.tbl_qcf WHERE no_order LIKE '$Order%' AND no_po LIKE '$PO%' AND no_hanger LIKE '$Item%' AND warna LIKE '$Warna%' AND pelanggan LIKE '$Buyer%' ");
+    if ($sql === false) {
+      die(print_r(sqlsrv_errors(), true));
+    }
+	while($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
+    $tglFin = $r['tgl_fin'];
+    if ($tglFin instanceof DateTime) {
+      $tglFin = $tglFin->format('Y-m-d');
+    }
+    $tglIns = $r['tgl_ins'];
+    if ($tglIns instanceof DateTime) {
+      $tglIns = $tglIns->format('Y-m-d');
+    }
+    $tglPack = $r['tgl_pack'];
+    if ($tglPack instanceof DateTime) {
+      $tglPack = $tglPack->format('Y-m-d');
+    }
+    $tglMasuk = $r['tgl_masuk'];
+    if ($tglMasuk instanceof DateTime) {
+      $tglMasuk = $tglMasuk->format('Y-m-d');
+    }
 	$html .='<tr>
       <td align="center">'.$no.'</td>
 	  <td align="center">'.$r['nokk'].'</td>
@@ -96,10 +123,10 @@ border:hidden;
       <td align="center">'.$r['no_hanger'].'</td>
       <td align="center">'.$r['warna'].'</td>
       <td align="center">'.$r['lot'].'</td>
-      <td align="center">'.$r['tgl_fin'].'</td>
-      <td align="center">'.$r['tgl_ins'].'</td>
-      <td align="center">'.$r['tgl_pack'].'</td>
-      <td align="center">'.$r['tgl_masuk'].'</td>
+      <td align="center">'.$tglFin.'</td>
+      <td align="center">'.$tglIns.'</td>
+      <td align="center">'.$tglPack.'</td>
+      <td align="center">'.$tglMasuk.'</td>
       <td align="right">'.$r['rol'].'</td>
       <td align="right">'.$r['netto'].'</td>
       <td align="center">'.$r['panjang'].' '.$r['satuan'].'</td>

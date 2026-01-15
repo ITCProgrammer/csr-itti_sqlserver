@@ -3,6 +3,19 @@ ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
 
+function sqlsrv_escape_string($value) {
+	return str_replace("'", "''", $value);
+}
+function format_decimal_2($value) {
+if ($value === null || $value === '') {
+return '0.00';
+}
+if (is_numeric($value)) {
+return number_format((float)$value, 2, '.', '');
+}
+return $value;
+}
+
 ?>
 <?php 
 	
@@ -389,16 +402,16 @@ include "koneksi.php";
 	
 ?>
 <?php
-    $Awal       = isset($_POST['awal']) ? mysqli_real_escape_string($con, $_POST['awal']) : '';
-    $Akhir      = isset($_POST['akhir']) ? mysqli_real_escape_string($con, $_POST['akhir']) : '';
-    $Order      = isset($_POST['no_order']) ? mysqli_real_escape_string($con, $_POST['no_order']) : '';
-    $PO         = isset($_POST['no_po']) ? mysqli_real_escape_string($con, $_POST['no_po']) : '';
-    $Item       = isset($_POST['item']) ? mysqli_real_escape_string($con, $_POST['item']) : '';
-    $Warna      = isset($_POST['warna']) ? mysqli_real_escape_string($con, $_POST['warna']) : '';
-    $Langganan  = isset($_POST['langganan']) ? mysqli_real_escape_string($con, $_POST['langganan']) : '';
-    $Delay      = isset($_POST['delay']) ? mysqli_real_escape_string($con, $_POST['delay']) : '';
-    $Demand     = isset($_POST['demand']) ? mysqli_real_escape_string($con, $_POST['demand']) : '';
-    $Prodorder  = isset($_POST['prodorder']) ? mysqli_real_escape_string($con, $_POST['prodorder']) : '';
+    $Awal       = isset($_POST['awal']) ? sqlsrv_escape_string($_POST['awal']) : '';
+    $Akhir      = isset($_POST['akhir']) ? sqlsrv_escape_string($_POST['akhir']) : '';
+    $Order      = isset($_POST['no_order']) ? sqlsrv_escape_string($_POST['no_order']) : '';
+    $PO         = isset($_POST['no_po']) ? sqlsrv_escape_string($_POST['no_po']) : '';
+    $Item       = isset($_POST['item']) ? sqlsrv_escape_string($_POST['item']) : '';
+    $Warna      = isset($_POST['warna']) ? sqlsrv_escape_string($_POST['warna']) : '';
+    $Langganan  = isset($_POST['langganan']) ? sqlsrv_escape_string($_POST['langganan']) : '';
+    $Delay      = isset($_POST['delay']) ? sqlsrv_escape_string($_POST['delay']) : '';
+    $Demand     = isset($_POST['demand']) ? sqlsrv_escape_string($_POST['demand']) : '';
+    $Prodorder  = isset($_POST['prodorder']) ? sqlsrv_escape_string($_POST['prodorder']) : '';
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -454,15 +467,18 @@ include "koneksi.php";
 	  
 	  if (isset($_POST['update_qty_order'])) {
 		    $period = $_POST['now_tahun'].'-'.$_POST['now_bulan'];
-		    $code = "SELECT a.id, a.nodemand 
-                      FROM tbl_qcf a 
-                      LEFT JOIN tbl_qcf_qty_order b ON a.id = b.id 
+		      $code = "SELECT a.id, a.nodemand 
+                      FROM db_qc.tbl_qcf a 
+                      LEFT JOIN db_qc.tbl_qcf_qty_order b ON a.id = b.id 
                       WHERE a.tgl_masuk LIKE '%$period%' 
                       AND b.id IS NULL 
                       ORDER BY a.id DESC";
-			$sql = mysqli_query($con,$code);
+			$sql = sqlsrv_query($con,$code);
+			if ($sql === false) {
+				die(print_r(sqlsrv_errors(), true));
+			}
 			$array_demand = [] ; 
-			while($r=mysqli_fetch_array($sql)){ 
+			while($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){ 
 				$array_demand[$r['id']] = $r['nodemand'];
 			}
 			
@@ -489,8 +505,11 @@ include "koneksi.php";
 					berat_order_now ='$qty_order1',
 					panjang_order_now ='$qty_order2'
 					WHERE id='$id'");	
-				*/		
-				$sqlData=mysqli_query($con,"insert into tbl_qcf_qty_order(id,nodemand,berat_order_now,panjang_order_now) values ('$id','$datas','$qty_order1','$qty_order2')");					
+				*/
+				$sqlData=sqlsrv_query($con,"insert into db_qc.tbl_qcf_qty_order(id,nodemand,berat_order_now,panjang_order_now) values ('$id','$datas','$qty_order1','$qty_order2')");
+				if ($sqlData === false) {
+					die(print_r(sqlsrv_errors(), true));
+				}					
 					
 			}
 			
@@ -602,21 +621,12 @@ include "koneksi.php";
       <th width="142" rowspan="2"><div align="center">Warna</div></th>
       <th width="155" rowspan="2"><div align="center">Prod. Order/Lot</div></th>
       <th width="155" rowspan="2"><div align="center">L</div></th>
-      <th width="155" rowspan="2"><div align="center">Grms</div></th>
-	  <!--
-      <th width="155" rowspan="2"><div align="center">Tgl Fin</div></th>
-      <th width="80" rowspan="2"><div align="center">Tgl Insp</div></th>
-      <th width="94" rowspan="2"><div align="center">Tgl Pack</div></th>-->
-	  
+      <th width="155" rowspan="2"><div align="center">Grms</div></th> 
       <th width="70" rowspan="2"><div align="center">Tgl Msk</div></th>
       <th width="70" rowspan="2"><div align="center">Roll</div></th>
       <th width="60" rowspan="2"><div align="center">Netto</div></th>
       <th width="102" rowspan="2"><div align="center">Panjang</div></th>
       <th width="70" rowspan="2"><div align="center">Sisa</div></th>
-      <!-- <th width="70" rowspan="2"><div align="center">LOT Legacy</div></th> -->
-	  <!--
-      <th colspan="2"><div align="center"> Fin</div></th>
-      <th colspan="2"><div align="center"> Ins</div></th>-->
       <th width="70" rowspan="2"><div align="center">Cek Warna</div></th>
       <th width="70" rowspan="2"><div align="center">Masalah</div></th>
       <th colspan="2"><div align="center">FOC</div></th>
@@ -627,12 +637,6 @@ include "koneksi.php";
       <th width="70" rowspan="2"><div align="center">Availability</div></th>
       </tr>
    <tr>
-   <!--
-     <th width="70"><div align="center">L</div></th>
-     <th width="70"><div align="center">Grms</div></th>
-     <th width="70"><div align="center">L</div></th>
-     <th width="70"><div align="center">Grms</div></th>
-	 -->
      <th width="70"><div align="center">KG</div></th>
      <th width="70"><div align="center">Panjang</div></th>
      <th width="70"><div align="center">KG</div></th>
@@ -643,7 +647,7 @@ include "koneksi.php";
   <?php
   function get_nodemand($sql) {
 	  $nodemand = array();
-	  while($r=mysqli_fetch_array($sql)){
+	  while($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
 		  $nodemand[]  =$r['nodemand'];
 	  }
 	  return $nodemand  ;
@@ -651,13 +655,16 @@ include "koneksi.php";
   }
   
   $no=1;
-  if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-  if($Delay=="1"){ $Dly =" AND DATEDIFF(a.tgl_pack, a.tglcwarna)>=3 AND a.sts_nodelay='0'"; }
+  if($Awal!=""){ $Where =" AND CONVERT(date, a.tgl_masuk) BETWEEN '$Awal' AND '$Akhir' "; }
+  if($Delay=="1"){ $Dly =" AND DATEDIFF(day, a.tglcwarna, a.tgl_pack)>=3 AND a.sts_nodelay='0'"; }
   if($Awal!="" or $Delay=="1" or $Order!="" or $Warna!="" or $Item!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!=""){
-	  $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM tbl_qcf a
-	  left join tbl_qcf_qty_order b on (a.id = b.id)
+	  $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM db_qc.tbl_qcf a
+	  left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
     WHERE a.no_order LIKE '$Order%' AND a.no_po LIKE '$PO%' AND a.no_hanger LIKE '$Item%' AND a.warna LIKE '$Warna%' AND a.pelanggan LIKE '$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.lot LIKE '%$Prodorder%' $Where $Dly";
-  	$sql=mysqli_query($con,$code);
+  	$sql=sqlsrv_query($con,$code);
+		if ($sql === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 	/*
 	$code2 = "SELECT * FROM tbl_qcf
     WHERE no_order LIKE '$Order%' AND no_po LIKE '$PO%' AND no_hanger LIKE '$Item%' AND warna LIKE '$Warna%' AND pelanggan LIKE '$Langganan%' AND nodemand LIKE '%$Demand%' AND lot LIKE '%$Prodorder%' $Where $Dly";
@@ -665,10 +672,13 @@ include "koneksi.php";
 	
 	
 	}else{
-		$code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM tbl_qcf a 
-		left join tbl_qcf_qty_order b on (a.id = b.id)
+		$code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM db_qc.tbl_qcf a 
+		left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
     WHERE a.no_order LIKE '$Order' AND a.no_po LIKE '$PO' AND a.no_hanger LIKE '$Item' AND a.warna LIKE '$Warna' AND a.pelanggan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.lot LIKE '$Prodorder' $Where $Dly";
-		$sql=mysqli_query($con,$code);
+		$sql=sqlsrv_query($con,$code);
+		if ($sql === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 		/*
 		$code2 = "SELECT * FROM tbl_qcf 
     WHERE no_order LIKE '$Order' AND no_po LIKE '$PO' AND no_hanger LIKE '$Item' AND warna LIKE '$Warna' AND pelanggan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND lot LIKE '$Prodorder' $Where $Dly";
@@ -682,13 +692,26 @@ include "koneksi.php";
 	//$nodemand = ['00190922','00000560','00000562','00000951'];
 	//$qtyoutput = qty_order($get_nodemand );
 	
-	while($r=mysqli_fetch_array($sql)){
-    $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-    if($r['tglcwarna']==NULL){
-    $tgl_warna= new DateTime($r['tgl_pack']);}else{
-      $tgl_warna= new DateTime($r['tglcwarna']);
+	while($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
+    $tglMasuk = $r['tgl_masuk'];
+    if ($tglMasuk instanceof DateTime) {
+      $tglMasuk = $tglMasuk->format('Y-m-d');
     }
-    $tgl_pack= new DateTime($r['tgl_pack']);
+    $tglPackVal = $r['tgl_pack'];
+    $tglPackObj = ($tglPackVal instanceof DateTime) ? $tglPackVal : new DateTime($tglPackVal);
+    $tglCwarnaVal = $r['tglcwarna'];
+    $tglCwarnaObj = null;
+    if ($tglCwarnaVal instanceof DateTime) {
+      $tglCwarnaObj = $tglCwarnaVal;
+    } elseif ($tglCwarnaVal !== null && $tglCwarnaVal !== '') {
+      $tglCwarnaObj = new DateTime($tglCwarnaVal);
+    }
+    $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
+    if($tglCwarnaObj==NULL){
+    $tgl_warna= $tglPackObj;}else{
+      $tgl_warna= $tglCwarnaObj;
+    }
+    $tgl_pack= $tglPackObj;
     $delay = $tgl_pack->diff($tgl_warna);
 	?>
    <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -743,28 +766,17 @@ include "koneksi.php";
      <td align="center"><?php echo $r['lot'];?></td>
      <td align="center"><?php echo $r['lebar'];?></td>
      <td align="center"><?php echo $r['gramasi'];?></td>
-	 <!--
-     <td align="center"><?php echo $r['tgl_fin'];?></td>
-     <td align="center"><?php echo $r['tgl_ins'];?></td>
-     <td align="center"><?php echo $r['tgl_pack'];?></td>
-	 -->
-     <td align="center"><?php echo $r['tgl_masuk'];?></td>
+     <td align="center"><?php echo $tglMasuk;?></td>
      <td align="right"><?php echo $r['rol'];?></td>
      <td align="right"><?php echo $r['netto'];?></td>
      <td align="center"><?php echo $r['panjang']." ".$r['satuan'];?></td>
-     <td align="right"><?php echo $r['sisa'];?></td>
-	 <!--
-     <td align="center"><?php echo $r['lebar_fin'];?></td>
-     <td align="center"><?php echo $r['gramasi_fin'];?></td>
-     <td align="center"><?php echo $r['lebar_ins'];?></td>
-     <td align="center"><?php echo $r['gramasi_ins'];?></td>
-	 -->
+     <td align="right"><?php echo format_decimal_2($r['sisa']);?></td>
      <td><?php echo $r['cek_warna'];?></td>
      <td align="left"><?php echo $r['masalah'];?></td>
-     <td align="right"><?php echo $r['berat_extra'];?></td>
-     <td align="right"><?php echo $r['panjang_extra'];?></td>
-     <td><?php echo $r['estimasi'];?></td>
-     <td><?php echo $r['panjang_estimasi'];?></td>
+     <td align="right"><?php echo format_decimal_2($r['berat_extra']);?></td>
+     <td align="right"><?php echo format_decimal_2($r['panjang_extra']);?></td>
+     <td><?php echo format_decimal_2($r['estimasi']);?></td>
+     <td><?php echo format_decimal_2($r['berat_estimasi']);?></td>
      <td><?php echo $r['demand'];?></td>
      <td><?php echo $r['lot_erp_qcf'];?></td>
      <td><?php echo $r['ket'];?></td>
@@ -772,47 +784,6 @@ include "koneksi.php";
      </tr>
    <?php $no++; } ?>
    </tbody>
-   <!--
-   <tfoot class="bg-red">
-   <tr>
-     <td align="center"><div align="center">No</div></td>
-     <td align="center"><div align="center">Aksi_detail</div></td>
-     <td align="center"><div align="center">No KK</div></td>
-     <td align="center"><div align="center">No Demand New Server</div></td>
-     <td align="center"><div align="center">Buyer</div></td>
-     <td align="center"><div align="center">Order</div></td>
-     <td align="center"><div align="center">PO</div></td>
-     <td align="center"><div align="center">Qty Order</div></td>
-     <td align="center"><div align="center">Jml Bruto</div></td>
-     <td><div align="center">Hanger</div></td>
-     <td align="right"><div align="center">Item</div></td>
-     <td align="right"><div align="center">No Warna</div></td>
-     <td align="right"><div align="center">Warna</div></td>
-     <td align="right"><div align="center">Prod. Order/Lot</div></td>
-     <td align="right"><div align="center">L</div></td>
-     <td align="right"><div align="center">Grms</div></td>
-     <td align="right"><div align="center">Tgl Fin</div></td>
-     <td align="right"><div align="center">Tgl Insp</div></td>
-     <td align="right"><div align="center">Tgl Pack</div></td>
-     <td align="right"><div align="center">Tgl Msk</div></td>
-     <td align="right"><div align="center">Roll</div></td>
-     <td align="right"><div align="center">Netto</div></td>
-     <td align="right"><div align="center">Panjang</div></td>
-     <td align="right"><div align="center">Sisa</div></td>
-     <th><div align="center">L</div></th>
-     <th><div align="center">Grms</div></th>
-     <th><div align="center">L</div></th>
-     <th><div align="center">Grms</div></th>
-     <td align="right"><div align="center">Cek Warna</div></td>
-     <td align="right"><div align="center">Masalah</div></td>
-     <th><div align="center">KG</div></th>
-     <th><div align="center">Panjang</div></th>
-      <th><div align="center">No Demand Old Server</div></th>
-      <th><div align="center">Prod. Order Old Server</div></th>
-	   <td align="right"><div align="center">Ket</div></td>
-     <td align="right"><div align="center">Availability</div></td>
-     </tr>
-   </tfoot>-->
 </table>
 </form>
 
