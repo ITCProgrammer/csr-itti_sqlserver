@@ -3,6 +3,13 @@ ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
 
+function format_sqlsrv_date($value) {
+	if ($value instanceof DateTime) {
+		return $value->format('Y-m-d');
+	}
+	return $value;
+}
+
 if (isset($_POST['sql'])) {
 	$sql_code =  $_POST['sql'];
 ?>
@@ -159,12 +166,12 @@ if (isset($_POST['sql'])) {
 			<?php
 			$no = 1;
 
-			$sql = mysqli_query($con, $sql_code);
+			$sql = sqlsrv_query($con, $sql_code);
 
 			?>
 
 			<?php
-			while ($row1 = mysqli_fetch_array($sql)) {
+			while ($row1 = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
 				$dtArr = $row1['t_jawab'];
 				$data = explode(",", $dtArr);
 				$dtArr1 = $row1['persen'];
@@ -179,9 +186,9 @@ if (isset($_POST['sql'])) {
 				}
 			?>
 				<tr bgcolor="<?php echo $bgcolor; ?>">
-					<td align="center"><?php echo $row1['tgl_masuk']; ?></td>
-					<td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-					$dtsts = mysqli_fetch_assoc($rsts);
+					<td align="center"><?php echo format_sqlsrv_date($row1['tgl_masuk']); ?></td>
+					<td align="center"><?php $rsts= sqlsrv_query($con,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+					$dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
 					if($dtsts['status_approve']==1){
 					echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
 					}else if($dtsts['status_approve']==99){
@@ -277,9 +284,9 @@ if (isset($_POST['sql'])) {
 
 				<?php if ($row1['penghubung2_roll1'] and  $row1['penghubung2_roll1'] != '') { ?>
 					<tr bgcolor="<?php echo $bgcolor; ?>">
-						<td align="center"><?php echo $row1['tgl_masuk']; ?></td>
-						<td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-						$dtsts = mysqli_fetch_assoc($rsts);
+						<td align="center"><?php echo format_sqlsrv_date($row1['tgl_masuk']); ?></td>
+						<td align="center"><?php $rsts= sqlsrv_query($con,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+						$dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
 						if($dtsts['status_approve']==1){
 						echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
 						}else if($dtsts['status_approve']==99){
@@ -380,7 +387,7 @@ if (isset($_POST['sql'])) {
 				<?php if ($row1['penghubung3_roll1'] and  $row1['penghubung3_roll1'] != '') {
 				?>
 					<tr bgcolor="<?php echo $bgcolor; ?>">
-						<td align="center"><?php echo $row1['tgl_masuk']; ?></td>
+						<td align="center"><?php echo format_sqlsrv_date($row1['tgl_masuk']); ?></td>
 						<td align="center"><?php echo $row1['pelanggan']; ?></td>
 						<td align="center"><?php echo explode('/', $row1['pelanggan'])[1]; ?></td>
 						<td align="center"><?php echo $row1['no_po']; ?></td>

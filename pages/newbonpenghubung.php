@@ -4,6 +4,17 @@ set_time_limit(0);
 session_start();
 include "koneksi.php";
 
+function sqlsrv_escape_string($value) {
+  return str_replace("'", "''", $value);
+}
+
+function format_sqlsrv_date($value) {
+  if ($value instanceof DateTime) {
+    return $value->format('Y-m-d');
+  }
+  return $value;
+}
+
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -15,19 +26,19 @@ include "koneksi.php";
 </head>
 <body>
 <?php
-  $Awal          = isset($_POST['awal'])         ? mysqli_real_escape_string($con, $_POST['awal'])         : '';
-  $Akhir         = isset($_POST['akhir'])        ? mysqli_real_escape_string($con, $_POST['akhir'])        : '';
-  $Order         = isset($_POST['order'])        ? mysqli_real_escape_string($con, $_POST['order'])        : '';
-  $Hanger        = isset($_POST['hanger'])       ? mysqli_real_escape_string($con, $_POST['hanger'])       : '';
-  $PO            = isset($_POST['po'])           ? mysqli_real_escape_string($con, $_POST['po'])           : '';
-  $Warna         = isset($_POST['warna'])        ? mysqli_real_escape_string($con, $_POST['warna'])        : '';
-  $Item          = isset($_POST['item'])         ? mysqli_real_escape_string($con, $_POST['item'])         : '';
-  $Langganan     = isset($_POST['langganan'])    ? mysqli_real_escape_string($con, $_POST['langganan'])    : '';
-  $Pelanggan     = isset($_POST['pelanggan'])    ? mysqli_real_escape_string($con, $_POST['pelanggan'])    : '';
-  $Proses        = isset($_POST['prosesmkt'])    ? mysqli_real_escape_string($con, $_POST['prosesmkt'])    : '';
-  $sts_tembakdok = isset($_POST['sts_tembakdok'])? mysqli_real_escape_string($con, $_POST['sts_tembakdok']): '';
-  $ProdOrder     = isset($_POST['prod_order'])   ? mysqli_real_escape_string($con, $_POST['prod_order'])   : '';
-  $Demand        = isset($_POST['demand'])       ? mysqli_real_escape_string($con, $_POST['demand'])       : '';
+  $Awal          = isset($_POST['awal'])         ? sqlsrv_escape_string($_POST['awal'])         : '';
+  $Akhir         = isset($_POST['akhir'])        ? sqlsrv_escape_string($_POST['akhir'])        : '';
+  $Order         = isset($_POST['order'])        ? sqlsrv_escape_string($_POST['order'])        : '';
+  $Hanger        = isset($_POST['hanger'])       ? sqlsrv_escape_string($_POST['hanger'])       : '';
+  $PO            = isset($_POST['po'])           ? sqlsrv_escape_string($_POST['po'])           : '';
+  $Warna         = isset($_POST['warna'])        ? sqlsrv_escape_string($_POST['warna'])        : '';
+  $Item          = isset($_POST['item'])         ? sqlsrv_escape_string($_POST['item'])         : '';
+  $Langganan     = isset($_POST['langganan'])    ? sqlsrv_escape_string($_POST['langganan'])    : '';
+  $Pelanggan     = isset($_POST['pelanggan'])    ? sqlsrv_escape_string($_POST['pelanggan'])    : '';
+  $Proses        = isset($_POST['prosesmkt'])    ? sqlsrv_escape_string($_POST['prosesmkt'])    : '';
+  $sts_tembakdok = isset($_POST['sts_tembakdok'])? sqlsrv_escape_string($_POST['sts_tembakdok']): '';
+  $ProdOrder     = isset($_POST['prod_order'])   ? sqlsrv_escape_string($_POST['prod_order'])   : '';
+  $Demand        = isset($_POST['demand'])       ? sqlsrv_escape_string($_POST['demand'])       : '';
 	
   if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";}	
 
@@ -176,7 +187,7 @@ include "koneksi.php";
             $fields = [];
 
             if($Awal != "" && $Akhir != ""){ 
-              $fields[] = " DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; 
+              $fields[] = " CONVERT(date, tq.tgl_masuk) BETWEEN '$Awal' AND '$Akhir' "; 
             }
             if($Order != ""){ 
               $fields[] = " tq.no_order LIKE '%$Order%' "; 
@@ -203,38 +214,63 @@ include "koneksi.php";
               $fields[] = " tq.nodemand LIKE '%$Demand%' "; 
             }
             if($Proses != ""){ 
-              $fields[] = " sts_aksi='$Proses' "; 
+              $fields[] = " tq.sts_aksi='$Proses' "; 
             }
             if($sts_tembakdok=="1"){ 
-              $fields[] = " sts_tembakdok='1' "; 
+              $fields[] = " tq.sts_tembakdok='1' "; 
             }
             
             $default_fields = " AND tq.sts_pbon!='10' AND (tq.penghubung_masalah !='' or tq.penghubung_keterangan !='' or tq.penghubung_roll1 !='' or tq.penghubung_roll2 !='' or tq.penghubung_roll3 !=''  or tq.penghubung_dep !='' or tq.penghubung_dep_persen !='') ";
-            $group_by_fields = " GROUP BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk, tq.nodemand; ";
 
              $sql_code = "SELECT
                           tq.*,
-                          GROUP_CONCAT( DISTINCT b.no_ncp_gabungan SEPARATOR ', ' ) AS no_ncp,
-                          GROUP_CONCAT( DISTINCT b.masalah_dominan SEPARATOR ', ' ) AS masalah_utama,
-                          GROUP_CONCAT( DISTINCT b.akar_masalah SEPARATOR ', ' ) AS akar_masalah,
-                          GROUP_CONCAT( DISTINCT b.solusi_panjang SEPARATOR ', ' ) AS solusi_panjang,
+                          ncp.no_ncp,
+                          ncp.masalah_utama,
+                          ncp.akar_masalah,
+                          ncp.solusi_panjang,
                           tli.qty_loss AS qty_sisa,
                           tli.satuan AS satuan_sisa,
                           c.masalah_dominan,
                           c.ket
                         FROM
-                          tbl_qcf tq
-                          LEFT JOIN tbl_lap_inspeksi tli ON tq.nodemand = tli.nodemand 
-                          AND tq.no_order = tli.no_order
-                          LEFT JOIN tbl_ncp_qcf_now b ON tq.nodemand = b.nodemand 
-                          LEFT JOIN tbl_aftersales_now c ON c.nodemand = tq.nodemand
-                          AND c.nokk = tq.nokk
+                          db_qc.tbl_qcf tq
+                          OUTER APPLY (
+                            SELECT
+                              STUFF((SELECT DISTINCT ', ' + b2.no_ncp_gabungan
+                                      FROM  db_qc.tbl_ncp_qcf_now b2
+                                      WHERE b2.nodemand = tq.nodemand
+                                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS no_ncp,
+                              STUFF((SELECT DISTINCT ', ' + b2.masalah_dominan
+                                      FROM  db_qc.tbl_ncp_qcf_now b2
+                                      WHERE b2.nodemand = tq.nodemand
+                                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS masalah_utama,
+                              STUFF((SELECT DISTINCT ', ' + b2.akar_masalah
+                                      FROM db_qc.tbl_ncp_qcf_now b2
+                                      WHERE b2.nodemand = tq.nodemand
+                                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS akar_masalah,
+                              STUFF((SELECT DISTINCT ', ' + b2.solusi_panjang
+                                      FROM db_qc.tbl_ncp_qcf_now b2
+                                      WHERE b2.nodemand = tq.nodemand
+                                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS solusi_panjang
+                          ) ncp
+                          OUTER APPLY (
+                            SELECT TOP 1 tli2.qty_loss, tli2.satuan
+                            FROM db_qc.tbl_lap_inspeksi tli2
+                            WHERE tli2.nodemand = tq.nodemand
+                              AND tli2.no_order = tq.no_order
+                          ) tli
+                          OUTER APPLY (
+                            SELECT TOP 1 c2.masalah_dominan, c2.ket
+                            FROM db_qc.tbl_aftersales_now c2
+                            WHERE c2.nodemand = tq.nodemand
+                              AND c2.nokk = tq.nokk
+                          ) c
                           ";
 
             if(count($fields) > 0) {
-              $sql_code .= "WHERE " . implode("AND", $fields) . $default_fields . $group_by_fields;
+              $sql_code .= "WHERE " . implode("AND", $fields) . $default_fields;
             } 
-            $sql=mysqli_query($con,$sql_code);
+            $sql=sqlsrv_query($con,$sql_code);
             
 			/*
 			echo '<pre>';
@@ -257,7 +293,7 @@ include "koneksi.php";
             </div>
             <br>
 			<?php 
-                while($row1=mysqli_fetch_array($sql)){
+                while($row1=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
                   $dtArr=$row1['t_jawab'];
                   $data = explode(",",$dtArr);
                   $dtArr1=$row1['persen'];
@@ -276,9 +312,9 @@ include "koneksi.php";
               
 		 
         <tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
-            <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-            $dtsts = mysqli_fetch_assoc($rsts);
+            <td align="center"><?php echo format_sqlsrv_date($row1['tgl_masuk']);?></td>
+            <td align="center"><?php $rsts= sqlsrv_query($con,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+            $dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
             if($dtsts['status_approve']==1){
               echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
             }else if($dtsts['status_approve']==99){
@@ -388,9 +424,9 @@ include "koneksi.php";
 		  
 		  
 		  <tr bgcolor="<?php echo $bgcolor; ?>">
-        <td align="center"><?php echo $row1['tgl_masuk'];?></td>
-        <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-            $dtsts = mysqli_fetch_assoc($rsts);
+        <td align="center"><?php echo format_sqlsrv_date($row1['tgl_masuk']);?></td>
+        <td align="center"><?php $rsts= sqlsrv_query($con,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+            $dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
             if($dtsts['status_approve']==1){
               echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
             }else if($dtsts['status_approve']==99){
@@ -511,9 +547,9 @@ echo $row_actual_delivery['ACTUAL_DELIVERY'];?></td>
 		  
 		  
 		   <tr bgcolor="<?php echo $bgcolor; ?>">
-        <td align="center"><?php echo $row1['tgl_masuk'];?></td>
-        <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-            $dtsts = mysqli_fetch_assoc($rsts);
+        <td align="center"><?php echo format_sqlsrv_date($row1['tgl_masuk']);?></td>
+        <td align="center"><?php $rsts= sqlsrv_query($con,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+            $dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
             if($dtsts['status_approve']==1){
               echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
             }else if($dtsts['status_approve']==99){

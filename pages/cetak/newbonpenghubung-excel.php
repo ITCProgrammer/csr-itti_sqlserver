@@ -14,10 +14,21 @@ set_time_limit(0);
 session_start();
 include "../../koneksi.php";
 
+function sqlsrv_escape_string($value) {
+    return str_replace("'", "''", $value);
+}
+
+function format_sqlsrv_date($value) {
+    if ($value instanceof DateTime) {
+        return $value->format('Y-m-d');
+    }
+    return $value;
+}
+
 // Pindahkan fungsi ke sini, di luar loop
 function getStatusText($nodemand, $con) {
-    $rsts = mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$nodemand'");
-    $dtsts = mysqli_fetch_assoc($rsts);
+    $rsts = sqlsrv_query($con, "SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$nodemand'");
+    $dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
     if (!$dtsts) {
         return '';
     }
@@ -99,19 +110,19 @@ function formatResponsibility($dep, $persen_array) {
 </head>
 <body>
 <?php
-  $Awal          = isset($_GET['awal'])         ? mysqli_real_escape_string($con, $_GET['awal'])         : '';
-  $Akhir         = isset($_GET['akhir'])        ? mysqli_real_escape_string($con, $_GET['akhir'])        : '';
-  $Order         = isset($_GET['order'])        ? mysqli_real_escape_string($con, $_GET['order'])        : '';
-  $Hanger        = isset($_GET['hanger'])       ? mysqli_real_escape_string($con, $_GET['hanger'])       : '';
-  $PO            = isset($_GET['po'])           ? mysqli_real_escape_string($con, $_GET['po'])           : '';
-  $Warna         = isset($_GET['warna'])        ? mysqli_real_escape_string($con, $_GET['warna'])        : '';
-  $Item          = isset($_GET['item'])         ? mysqli_real_escape_string($con, $_GET['item'])         : '';
-  $Langganan     = isset($_GET['langganan'])    ? mysqli_real_escape_string($con, $_GET['langganan'])    : '';
-  $Pelanggan     = isset($_GET['pelanggan'])    ? mysqli_real_escape_string($con, $_GET['pelanggan'])    : '';
-  $Proses        = isset($_GET['prosesmkt'])    ? mysqli_real_escape_string($con, $_GET['prosesmkt'])    : '';
-  $sts_tembakdok = isset($_GET['sts_tembakdok'])? mysqli_real_escape_string($con, $_GET['sts_tembakdok']): '';
-  $ProdOrder     = isset($_GET['prod_order'])   ? mysqli_real_escape_string($con, $_GET['prod_order'])   : '';
-  $Demand        = isset($_GET['demand'])       ? mysqli_real_escape_string($con, $_GET['demand'])       : '';
+  $Awal          = isset($_GET['awal'])         ? sqlsrv_escape_string($_GET['awal'])         : '';
+  $Akhir         = isset($_GET['akhir'])        ? sqlsrv_escape_string($_GET['akhir'])        : '';
+  $Order         = isset($_GET['order'])        ? sqlsrv_escape_string($_GET['order'])        : '';
+  $Hanger        = isset($_GET['hanger'])       ? sqlsrv_escape_string($_GET['hanger'])       : '';
+  $PO            = isset($_GET['po'])           ? sqlsrv_escape_string($_GET['po'])           : '';
+  $Warna         = isset($_GET['warna'])        ? sqlsrv_escape_string($_GET['warna'])        : '';
+  $Item          = isset($_GET['item'])         ? sqlsrv_escape_string($_GET['item'])         : '';
+  $Langganan     = isset($_GET['langganan'])    ? sqlsrv_escape_string($_GET['langganan'])    : '';
+  $Pelanggan     = isset($_GET['pelanggan'])    ? sqlsrv_escape_string($_GET['pelanggan'])    : '';
+  $Proses        = isset($_GET['prosesmkt'])    ? sqlsrv_escape_string($_GET['prosesmkt'])    : '';
+  $sts_tembakdok = isset($_GET['sts_tembakdok'])? sqlsrv_escape_string($_GET['sts_tembakdok']): '';
+  $ProdOrder     = isset($_GET['prod_order'])   ? sqlsrv_escape_string($_GET['prod_order'])   : '';
+  $Demand        = isset($_GET['demand'])       ? sqlsrv_escape_string($_GET['demand'])       : '';
 
   // Hapus variabel tidak terpakai dan mencegah notice pada $_POST untuk file export GET
 
@@ -172,7 +183,7 @@ function formatResponsibility($dep, $persen_array) {
     $fields = [];
 
     if($Awal != "" && $Akhir != ""){ 
-      $fields[] = " DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; 
+      $fields[] = " CONVERT(date, tq.tgl_masuk) BETWEEN '$Awal' AND '$Akhir' "; 
     }
     if($Order != ""){ 
       $fields[] = " tq.no_order LIKE '%$Order%' "; 
@@ -206,31 +217,55 @@ function formatResponsibility($dep, $persen_array) {
     }
     
     $default_fields = " AND tq.sts_pbon!='10' AND (tq.penghubung_masalah !='' or tq.penghubung_keterangan !='' or tq.penghubung_roll1 !='' or tq.penghubung_roll2 !='' or tq.penghubung_roll3 !=''  or tq.penghubung_dep !='' or tq.penghubung_dep_persen !='') ";
-    $group_by_fields = " GROUP BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk, tq.nodemand; ";
-
      $sql_code = "SELECT
                   tq.*,
-                  GROUP_CONCAT( DISTINCT b.no_ncp_gabungan SEPARATOR ', ' ) AS no_ncp,
-                  GROUP_CONCAT( DISTINCT b.masalah_dominan SEPARATOR ', ' ) AS masalah_utama,
-                  GROUP_CONCAT( DISTINCT b.akar_masalah SEPARATOR ', ' ) AS akar_masalah,
-                  GROUP_CONCAT( DISTINCT b.solusi_panjang SEPARATOR ', ' ) AS solusi_panjang,
+                  ncp.no_ncp,
+                  ncp.masalah_utama,
+                  ncp.akar_masalah,
+                  ncp.solusi_panjang,
                   tli.qty_loss AS qty_sisa,
                   tli.satuan AS satuan_sisa,
                   c.masalah_dominan,
                   c.ket
                 FROM
-                  tbl_qcf tq
-                  LEFT JOIN tbl_lap_inspeksi tli ON tq.nodemand = tli.nodemand 
-                  AND tq.no_order = tli.no_order
-                  LEFT JOIN tbl_ncp_qcf_now b ON tq.nodemand = b.nodemand 
-                  LEFT JOIN tbl_aftersales_now c ON c.nodemand = tq.nodemand
-                  AND c.nokk = tq.nokk
+                  db_qc.tbl_qcf tq
+                  OUTER APPLY (
+                    SELECT
+                      STUFF((SELECT DISTINCT ', ' + b2.no_ncp_gabungan
+                              FROM db_qc.tbl_ncp_qcf_now b2
+                              WHERE b2.nodemand = tq.nodemand
+                              FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS no_ncp,
+                      STUFF((SELECT DISTINCT ', ' + b2.masalah_dominan
+                              FROM db_qc.tbl_ncp_qcf_now b2
+                              WHERE b2.nodemand = tq.nodemand
+                              FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS masalah_utama,
+                      STUFF((SELECT DISTINCT ', ' + b2.akar_masalah
+                              FROM db_qc.tbl_ncp_qcf_now b2
+                              WHERE b2.nodemand = tq.nodemand
+                              FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS akar_masalah,
+                      STUFF((SELECT DISTINCT ', ' + b2.solusi_panjang
+                              FROM db_qc.tbl_ncp_qcf_now b2
+                              WHERE b2.nodemand = tq.nodemand
+                              FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') AS solusi_panjang
+                  ) ncp
+                  OUTER APPLY (
+                    SELECT TOP 1 tli2.qty_loss, tli2.satuan
+                    FROM db_qc.tbl_lap_inspeksi tli2
+                    WHERE tli2.nodemand = tq.nodemand
+                      AND tli2.no_order = tq.no_order
+                  ) tli
+                  OUTER APPLY (
+                    SELECT TOP 1 c2.masalah_dominan, c2.ket
+                    FROM db_qc.tbl_aftersales_now c2
+                    WHERE c2.nodemand = tq.nodemand
+                      AND c2.nokk = tq.nokk
+                  ) c
                   ";
 
     if(count($fields) > 0) {
-      $sql_code .= "WHERE " . implode("AND", $fields) . $default_fields . $group_by_fields;
+      $sql_code .= "WHERE " . implode("AND", $fields) . $default_fields;
     } 
-    $sql=mysqli_query($con,$sql_code);
+    $sql=sqlsrv_query($con,$sql_code);
     
     // Style definitions
     // $headerStyle = "border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;";
@@ -240,7 +275,7 @@ function formatResponsibility($dep, $persen_array) {
     // $evenRowStyle = "background-color: #f2f2f2;";
     // $oddRowStyle = "background-color: #ffffff;";
     
-    while($row1=mysqli_fetch_array($sql)){
+    while($row1=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
       // Aman pecah pelanggan/buyer
       $pelParts = explode('/', (string)$row1['pelanggan'], 2);
       $pelangganOnly = $pelParts[0] ?? '';
@@ -260,7 +295,7 @@ function formatResponsibility($dep, $persen_array) {
       }
   ?>
     <tr>
-      <td class="date"><?php echo $row1['tgl_masuk']; ?></td>
+      <td class="date"><?php echo format_sqlsrv_date($row1['tgl_masuk']); ?></td>
       <td class="text-center text"><?php echo getStatusText($row1['nodemand'], $con); ?></td>
       <td class="wrap text"><?php echo $pelangganOnly; ?></td>
       <td class="wrap text"><?php echo $buyerOnly; ?></td>
@@ -299,7 +334,7 @@ function formatResponsibility($dep, $persen_array) {
     
     <?php if($row1['penghubung2_roll1'] and  $row1['penghubung2_roll1'] !='') { ?>
     <tr>
-      <td class="date"><?php echo $row1['tgl_masuk']; ?></td>
+      <td class="date"><?php echo format_sqlsrv_date($row1['tgl_masuk']); ?></td>
       <td class="text-center text"><?php echo getStatusText($row1['nodemand'], $con); ?></td>
       <td class="wrap text"><?php echo $pelangganOnly; ?></td>
       <td class="wrap text"><?php echo $buyerOnly; ?></td>
@@ -339,7 +374,7 @@ function formatResponsibility($dep, $persen_array) {
     
     <?php if($row1['penghubung3_roll1'] and  $row1['penghubung3_roll1'] !='') { ?>
     <tr style="<?= $bgcolor ?> <?= $dataStyle ?>">
-      <td><?= $row1['tgl_masuk'];?></td>
+      <td><?= format_sqlsrv_date($row1['tgl_masuk']); ?></td>
       <td><?= getStatusText($row1['nodemand'], $con);?></td>
       <td><?= $pelangganOnly; ?></td>
       <td><?= $buyerOnly; ?></td>
